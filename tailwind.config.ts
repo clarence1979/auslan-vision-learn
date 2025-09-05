@@ -32,6 +32,18 @@ export default {
 					DEFAULT: 'hsl(var(--secondary))',
 					foreground: 'hsl(var(--secondary-foreground))'
 				},
+				success: {
+					DEFAULT: 'hsl(var(--success))',
+					foreground: 'hsl(var(--success-foreground))'
+				},
+				practice: {
+					DEFAULT: 'hsl(var(--practice))',
+					foreground: 'hsl(var(--practice-foreground))'
+				},
+				learning: {
+					DEFAULT: 'hsl(var(--learning))',
+					foreground: 'hsl(var(--learning-foreground))'
+				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
 					foreground: 'hsl(var(--destructive-foreground))'

@@ -1,12 +1,277 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  Settings, 
+  BookOpen, 
+  Play, 
+  Trophy, 
+  Camera as CameraIcon,
+  AlertCircle,
+  CheckCircle
+} from 'lucide-react';
+
+import { Camera } from '@/components/Camera';
+import { GestureLibrary } from '@/components/GestureLibrary';
+import { SettingsModal } from '@/components/SettingsModal';
+import { useOpenAI } from '@/hooks/useOpenAI';
+import { useProgress } from '@/hooks/useProgress';
+import { Gesture } from '@/data/gestures';
 
 const Index = () => {
+  const { toast } = useToast();
+  const { config, analyzeGesture, isAnalyzing, error } = useOpenAI();
+  const { recordAttempt, getSuccessRate, getMasteredCount } = useProgress();
+  
+  const [activeMode, setActiveMode] = useState<'learn' | 'practice'>('learn');
+  const [selectedGesture, setSelectedGesture] = useState<Gesture | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [lastResult, setLastResult] = useState<any>(null);
+
+  const handleGestureCapture = async (imageData: string) => {
+    if (!selectedGesture) {
+      toast({
+        title: "No gesture selected",
+        description: "Please select a gesture to practice first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!config.isValid) {
+      toast({
+        title: "API key required",
+        description: "Please configure your OpenAI API key in settings.",
+        variant: "destructive"
+      });
+      setShowSettings(true);
+      return;
+    }
+
+    try {
+      const result = await analyzeGesture(imageData, selectedGesture.name);
+      setLastResult(result);
+      
+      // Record the attempt
+      recordAttempt(selectedGesture.id, result.recognized);
+      
+      // Show feedback
+      toast({
+        title: result.recognized ? "Great job!" : "Keep practicing!",
+        description: result.feedback,
+        variant: result.recognized ? "default" : "destructive"
+      });
+      
+    } catch (err) {
+      toast({
+        title: "Analysis failed",
+        description: err instanceof Error ? err.message : "Failed to analyze gesture",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleGestureSelect = (gesture: Gesture) => {
+    setSelectedGesture(gesture);
+    setLastResult(null);
+    setActiveMode('practice');
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-card">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-primary">AUSLAN Vision Learn</h1>
+              <p className="text-sm text-muted-foreground">
+                Learn Australian Sign Language with AI-powered gesture recognition
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              {/* Stats */}
+              <div className="hidden md:flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-1">
+                  <Trophy className="h-4 w-4 text-success" />
+                  <span>{getMasteredCount()} mastered</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>Success rate: {getSuccessRate()}%</span>
+                </div>
+              </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSettings(true)}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="container mx-auto px-4 py-6">
+        {/* API Key Warning */}
+        {!config.isValid && (
+          <Alert className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>OpenAI API key required for gesture recognition.</span>
+              <Button variant="outline" size="sm" onClick={() => setShowSettings(true)}>
+                Configure
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <Tabs value={activeMode} onValueChange={(v) => setActiveMode(v as 'learn' | 'practice')}>
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="learn" className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              Learn Gestures
+            </TabsTrigger>
+            <TabsTrigger value="practice" className="flex items-center gap-2">
+              <Play className="h-4 w-4" />
+              Practice Mode
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="learn">
+            <GestureLibrary
+              onGestureSelect={handleGestureSelect}
+              selectedGesture={selectedGesture}
+            />
+          </TabsContent>
+
+          <TabsContent value="practice" className="space-y-6">
+            {selectedGesture ? (
+              <div className="grid lg:grid-cols-2 gap-6">
+                {/* Camera and controls */}
+                <div className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <CameraIcon className="h-5 w-5" />
+                        Practice: {selectedGesture.name}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Camera onCapture={handleGestureCapture} />
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Gesture info and feedback */}
+                <div className="space-y-4">
+                  {/* Current gesture info */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Current Gesture</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="text-center">
+                        <div className="text-4xl font-bold mb-2">{selectedGesture.name}</div>
+                        <Badge className="mb-4">
+                          {selectedGesture.category}
+                        </Badge>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          {selectedGesture.description}
+                        </p>
+                        <div className="bg-accent rounded-lg p-4">
+                          <p className="text-sm font-medium">Instructions:</p>
+                          <p className="text-sm">{selectedGesture.instructions}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Feedback */}
+                  {lastResult && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          {lastResult.recognized ? (
+                            <CheckCircle className="h-5 w-5 text-success" />
+                          ) : (
+                            <AlertCircle className="h-5 w-5 text-destructive" />
+                          )}
+                          Analysis Result
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span>Confidence:</span>
+                          <Badge variant={lastResult.confidence > 70 ? "default" : "secondary"}>
+                            {lastResult.confidence}%
+                          </Badge>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm font-medium mb-2">Feedback:</p>
+                          <p className="text-sm text-muted-foreground">{lastResult.feedback}</p>
+                        </div>
+                        
+                        {lastResult.suggestions && lastResult.suggestions.length > 0 && (
+                          <div>
+                            <p className="text-sm font-medium mb-2">Suggestions:</p>
+                            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                              {lastResult.suggestions.map((suggestion: string, index: number) => (
+                                <li key={index}>{suggestion}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Loading state */}
+                  {isAnalyzing && (
+                    <Card>
+                      <CardContent className="flex items-center justify-center py-8">
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                          <p className="text-sm text-muted-foreground">Analyzing gesture...</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="flex items-center justify-center py-12">
+                  <div className="text-center">
+                    <Play className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">Ready to Practice!</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Select a gesture from the Learn tab to start practicing
+                    </p>
+                    <Button onClick={() => setActiveMode('learn')}>
+                      Choose a Gesture
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        open={showSettings}
+        onOpenChange={setShowSettings}
+      />
     </div>
   );
 };
