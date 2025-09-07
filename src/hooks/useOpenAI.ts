@@ -158,25 +158,32 @@ Be encouraging and educational in your feedback. Consider hand position, finger 
       }
 
       const data = await response.json();
+      console.log('OpenAI API response:', data);
       const content = data.choices[0]?.message?.content;
+      console.log('Raw content:', content);
 
       if (!content) {
         throw new Error('No response from OpenAI');
       }
 
+      // Clean the content - remove markdown code blocks if present
+      const cleanContent = content.replace(/```json\s*|\s*```/g, '').trim();
+      console.log('Cleaned content:', cleanContent);
+
       // Try to parse JSON response
       try {
-        const result = JSON.parse(content);
-        console.log('Parsed OpenAI result:', result);
+        const result = JSON.parse(cleanContent);
+        console.log('Successfully parsed OpenAI result:', result);
         return {
           recognized: result.recognized || false,
           gesture: result.gesture || 'unknown',
           confidence: result.confidence || 0,
-          feedback: result.feedback || content,
+          feedback: result.feedback || 'No feedback available',
           suggestions: result.suggestions || []
         };
       } catch (parseError) {
-        console.log('JSON parse failed, treating as plain text:', parseError);
+        console.error('JSON parse failed:', parseError);
+        console.log('Failed content:', cleanContent);
         // Fallback if response isn't JSON
         return {
           recognized: false,
