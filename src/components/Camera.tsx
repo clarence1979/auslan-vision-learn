@@ -33,23 +33,16 @@ export const Camera: React.FC<CameraProps> = ({
   const autoCaptureRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleCapture = useCallback(() => {
-    console.log('Camera handleCapture called');
     const imageData = captureFrame();
     if (imageData && onCapture) {
-      console.log('Calling onCapture with image data');
       onCapture(imageData);
-    } else {
-      console.log('No image data or onCapture callback');
     }
   }, [captureFrame, onCapture]);
 
   // Auto-capture effect
   useEffect(() => {
-    console.log('Auto-capture effect:', { autoCapture, isActive, hasOnCapture: !!onCapture });
     if (autoCapture && isActive && onCapture) {
-      console.log('Setting up auto-capture interval');
       autoCaptureRef.current = setInterval(() => {
-        console.log('Auto-capture triggered');
         handleCapture();
       }, captureInterval);
 
