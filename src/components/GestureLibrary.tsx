@@ -4,10 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { Trophy, Play, BookOpen, Wand2 } from 'lucide-react';
+import { Trophy, Play, BookOpen } from 'lucide-react';
 import { AUSLAN_GESTURES, GESTURE_CATEGORIES, Gesture } from '@/data/gestures';
 import { useProgress } from '@/hooks/useProgress';
-import { ImageGenerationModal } from '@/components/ImageGenerationModal';
 
 interface GestureLibraryProps {
   onGestureSelect: (gesture: Gesture) => void;
@@ -20,8 +19,6 @@ export const GestureLibrary: React.FC<GestureLibraryProps> = ({
 }) => {
   const { getGestureProgress, getMasteredCount } = useProgress();
   const [activeCategory, setActiveCategory] = useState('alphabet');
-  const [showImageGeneration, setShowImageGeneration] = useState(false);
-  const [gestureImages, setGestureImages] = useState<Record<string, string>>({});
 
   const getGesturesByCategory = (category: string) => {
     return AUSLAN_GESTURES.filter(gesture => gesture.category === category);
@@ -43,32 +40,12 @@ export const GestureLibrary: React.FC<GestureLibraryProps> = ({
     return category?.color || 'primary';
   };
 
-  const handleImagesGenerated = (images: Array<{ gesture: string; imageURL: string }>) => {
-    const imageMap: Record<string, string> = {};
-    images.forEach(({ gesture, imageURL }) => {
-      // Find the gesture by name and use its ID
-      const gestureData = AUSLAN_GESTURES.find(g => g.name === gesture);
-      if (gestureData) {
-        imageMap[gestureData.id] = imageURL;
-      }
-    });
-    setGestureImages(prev => ({ ...prev, ...imageMap }));
-  };
-
   return (
     <div className="space-y-6">
       {/* Header with stats */}
       <div className="text-center">
         <div className="flex items-center justify-center gap-4 mb-4">
           <h2 className="text-2xl font-bold">AUSLAN Gesture Library</h2>
-          <Button
-            onClick={() => setShowImageGeneration(true)}
-            size="sm"
-            variant="outline"
-          >
-            <Wand2 className="h-4 w-4 mr-2" />
-            Generate Images
-          </Button>
         </div>
         <div className="flex justify-center gap-4 text-sm text-muted-foreground">
           <span>{AUSLAN_GESTURES.length} total gestures</span>
@@ -106,9 +83,8 @@ export const GestureLibrary: React.FC<GestureLibraryProps> = ({
                 const progress = getProgressPercentage(gesture);
                 const mastered = isMastered(gesture);
                 const isSelected = selectedGesture?.id === gesture.id;
-                const hasGeneratedImage = gestureImages[gesture.id];
                 const hasStaticImage = gesture.imageUrl;
-                const displayImage = hasGeneratedImage || hasStaticImage;
+                const displayImage = hasStaticImage;
 
                 return (
                   <Card
@@ -132,7 +108,7 @@ export const GestureLibrary: React.FC<GestureLibraryProps> = ({
                       <div className="aspect-square bg-muted rounded-lg overflow-hidden">
                         {displayImage ? (
                           <img
-                            src={hasGeneratedImage ? gestureImages[gesture.id] : gesture.imageUrl}
+                            src={gesture.imageUrl}
                             alt={`AUSLAN gesture for ${gesture.name}`}
                             className="w-full h-full object-cover"
                           />
@@ -204,13 +180,6 @@ export const GestureLibrary: React.FC<GestureLibraryProps> = ({
           </TabsContent>
         ))}
       </Tabs>
-
-      {/* Image Generation Modal */}
-      <ImageGenerationModal
-        open={showImageGeneration}
-        onOpenChange={setShowImageGeneration}
-        onImagesGenerated={handleImagesGenerated}
-      />
     </div>
   );
 };
