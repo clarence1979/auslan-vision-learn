@@ -174,12 +174,29 @@ const Index = () => {
                         Practice: {selectedGesture.name}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="space-y-4">
                       <Camera 
                         onCapture={selectedGesture ? handleGestureCapture : undefined}
                         autoCapture={!!selectedGesture}
                         captureInterval={3000}
                       />
+                      
+                      {/* Stop Camera Button */}
+                      <div className="flex justify-center">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => {
+                            // Stop camera and clear selection
+                            setSelectedGesture(null);
+                            setLastResult(null);
+                            setActiveMode('learn');
+                          }}
+                          className="flex items-center gap-2"
+                        >
+                          <CameraIcon className="h-4 w-4" />
+                          Stop Camera
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 </div>
