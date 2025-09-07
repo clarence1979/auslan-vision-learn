@@ -20,12 +20,14 @@ import { GestureLibrary } from '@/components/GestureLibrary';
 import { SettingsModal } from '@/components/SettingsModal';
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { useProgress } from '@/hooks/useProgress';
+import { useFingerDetection } from '@/hooks/useFingerDetection';
 import { Gesture } from '@/data/gestures';
 
 const Index = () => {
   const { toast } = useToast();
   const { config, analyzeGesture, isAnalyzing, error } = useOpenAI();
   const { recordAttempt, getSuccessRate, getMasteredCount } = useProgress();
+  const { detectFingers, isAnalyzing: isDetectingFingers, initializeHands } = useFingerDetection();
   
   const [activeMode, setActiveMode] = useState<'learn' | 'practice'>('learn');
   const [selectedGesture, setSelectedGesture] = useState<Gesture | null>(null);
@@ -57,9 +59,26 @@ const Index = () => {
       return;
     }
 
-    console.log('Starting OpenAI analysis for gesture:', selectedGesture.name);
+    console.log('Starting finger detection...');
 
     try {
+      // First, detect if fingers are present in the image
+      const fingerResult = await detectFingers(imageData);
+      console.log('Finger detection result:', fingerResult);
+
+      if (!fingerResult.hasFingers || fingerResult.confidence < 0.3) {
+        console.log('No fingers detected or low confidence:', fingerResult.confidence);
+        toast({
+          title: "No hands detected",
+          description: "Please position your hand clearly in the camera view with fingers visible.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('Fingers detected! Starting OpenAI analysis for gesture:', selectedGesture.name);
+      
+      // Only proceed with OpenAI analysis if fingers are detected
       const result = await analyzeGesture(imageData, selectedGesture.name);
       console.log('Analysis result:', result);
       setLastResult(result);
@@ -89,6 +108,8 @@ const Index = () => {
     setSelectedGesture(gesture);
     setLastResult(null);
     setActiveMode('practice');
+    // Initialize finger detection when starting practice
+    initializeHands();
   };
 
   return (
@@ -278,12 +299,14 @@ const Index = () => {
                   )}
 
                   {/* Loading state */}
-                  {isAnalyzing && (
+                  {(isAnalyzing || isDetectingFingers) && (
                     <Card>
                       <CardContent className="flex items-center justify-center py-8">
                         <div className="text-center">
                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                          <p className="text-sm text-muted-foreground">Analyzing gesture...</p>
+                          <p className="text-sm text-muted-foreground">
+                            {isDetectingFingers ? "Detecting hands..." : "Analyzing gesture..."}
+                          </p>
                         </div>
                       </CardContent>
                     </Card>
