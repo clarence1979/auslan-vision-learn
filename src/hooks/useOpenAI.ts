@@ -17,18 +17,14 @@ export const useOpenAI = () => {
   const [config, setConfig] = useState<OpenAIConfig>(() => {
     try {
       const saved = localStorage.getItem('auslan-openai-config');
-      console.log('Loading config from localStorage:', saved);
       if (saved) {
         const parsed = JSON.parse(saved);
-        console.log('Parsed config:', parsed);
         const result = {
           apiKey: parsed.apiKey || '',
           isValid: parsed.apiKey?.startsWith('sk-') && parsed.apiKey?.length > 20
         };
-        console.log('Initial config result:', result);
         return result;
       }
-      console.log('No saved config found, using defaults');
       return { apiKey: '', isValid: false };
     } catch (error) {
       console.error('Error loading config from localStorage:', error);
@@ -38,9 +34,41 @@ export const useOpenAI = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Listen for localStorage changes and update config
+  useEffect(() => {
+    const handleStorageChange = () => {
+      try {
+        const saved = localStorage.getItem('auslan-openai-config');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          const newConfig = {
+            apiKey: parsed.apiKey || '',
+            isValid: parsed.apiKey?.startsWith('sk-') && parsed.apiKey?.length > 20
+          };
+          setConfig(newConfig);
+        }
+      } catch (error) {
+        console.error('Error handling storage change:', error);
+      }
+    };
+
+    // Listen for storage events (from other tabs/components)
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom events (for same-tab updates)
+    window.addEventListener('auslan-config-updated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('auslan-config-updated', handleStorageChange);
+    };
+  }, []);
+
   // Persist config to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('auslan-openai-config', JSON.stringify(config));
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new CustomEvent('auslan-config-updated'));
   }, [config]);
 
   const setApiKey = useCallback((apiKey: string) => {

@@ -33,27 +33,7 @@ const Index = () => {
   const [lastResult, setLastResult] = useState<any>(null);
 
   const handleGestureCapture = async (imageData: string) => {
-    console.log('=== GESTURE CAPTURE DEBUG ===');
-    console.log('Selected gesture:', selectedGesture?.name);
-    console.log('Config:', { isValid: config.isValid, hasApiKey: !!config.apiKey });
-    console.log('Config API Key length:', config.apiKey.length);
-    
-    // Check localStorage directly
-    const savedConfig = localStorage.getItem('auslan-openai-config');
-    console.log('Direct localStorage check:', savedConfig);
-    if (savedConfig) {
-      try {
-        const parsed = JSON.parse(savedConfig);
-        console.log('Parsed localStorage data:', parsed);
-      } catch (e) {
-        console.log('Error parsing localStorage:', e);
-      }
-    }
-    
-    console.log('================================');
-    
     if (!selectedGesture) {
-      console.log('No gesture selected - showing toast');
       toast({
         title: "No gesture selected",
         description: "Please select a gesture to practice first.",
@@ -63,7 +43,6 @@ const Index = () => {
     }
 
     if (!config.isValid) {
-      console.log('Config validation failed - showing API key toast');
       toast({
         title: "API key required",
         description: "Please configure your OpenAI API key in settings.",
