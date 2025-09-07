@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 export interface OpenAIConfig {
   apiKey: string;
@@ -14,12 +14,32 @@ export interface GestureAnalysisResult {
 }
 
 export const useOpenAI = () => {
-  const [config, setConfig] = useState<OpenAIConfig>({ apiKey: '', isValid: false });
+  const [config, setConfig] = useState<OpenAIConfig>(() => {
+    const saved = localStorage.getItem('auslan-openai-config');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return {
+          apiKey: parsed.apiKey || '',
+          isValid: parsed.apiKey?.startsWith('sk-') && parsed.apiKey?.length > 20
+        };
+      } catch {
+        return { apiKey: '', isValid: false };
+      }
+    }
+    return { apiKey: '', isValid: false };
+  });
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Persist config to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('auslan-openai-config', JSON.stringify(config));
+  }, [config]);
+
   const setApiKey = useCallback((apiKey: string) => {
-    setConfig({ apiKey, isValid: apiKey.startsWith('sk-') && apiKey.length > 20 });
+    const newConfig = { apiKey, isValid: apiKey.startsWith('sk-') && apiKey.length > 20 };
+    setConfig(newConfig);
     setError(null);
   }, []);
 
@@ -42,7 +62,7 @@ export const useOpenAI = () => {
           'Authorization': `Bearer ${config.apiKey}`
         },
         body: JSON.stringify({
-          model: 'gpt-4-vision-preview',
+          model: 'gpt-4.1-2025-04-14',
           messages: [
             {
               role: 'system',

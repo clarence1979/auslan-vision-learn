@@ -29,9 +29,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const { config, setApiKey, testApiKey } = useOpenAI();
   const { progress, resetProgress, getSuccessRate, getMasteredCount } = useProgress();
   
-  const [tempApiKey, setTempApiKey] = useState(config.apiKey);
+  const [tempApiKey, setTempApiKey] = useState('');
   const [isValidating, setIsValidating] = useState(false);
   const [validationResult, setValidationResult] = useState<boolean | null>(null);
+
+  // Initialize tempApiKey with current config when modal opens
+  React.useEffect(() => {
+    if (open) {
+      setTempApiKey(config.apiKey);
+      setValidationResult(null);
+    }
+  }, [open, config.apiKey]);
 
   const handleSaveApiKey = async () => {
     if (!tempApiKey.trim()) {
