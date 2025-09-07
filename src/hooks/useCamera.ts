@@ -39,14 +39,18 @@ export const useCamera = (): CameraHook => {
   }, [currentDeviceId]);
 
   const startCamera = useCallback(async () => {
+    console.log('Starting camera...');
     setIsLoading(true);
     setError(null);
 
     try {
       // Check if browser supports camera
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.error('Camera not supported in browser');
         throw new Error('Camera not supported in this browser');
       }
+      
+      console.log('Browser supports camera, requesting permissions...');
 
       const constraints: MediaStreamConstraints = {
         video: {
@@ -58,18 +62,27 @@ export const useCamera = (): CameraHook => {
       };
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log('Camera stream obtained successfully');
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
         setIsActive(true);
+        console.log('Camera activated successfully');
+      } else {
+        console.error('Video ref is null');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to access camera';
+      console.error('Camera startup failed:', err);
+      console.error('Error details:', {
+        name: err instanceof Error ? err.name : 'Unknown',
+        message: err instanceof Error ? err.message : 'Unknown error'
+      });
       setError(errorMessage);
-      console.error('Camera error:', err);
     } finally {
       setIsLoading(false);
+      console.log('Camera startup process completed');
     }
   }, [currentDeviceId]);
 
