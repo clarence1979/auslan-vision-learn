@@ -64,14 +64,18 @@ export const useCamera = (): CameraHook => {
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       console.log('Camera stream obtained successfully');
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-        setIsActive(true);
-        console.log('Camera activated successfully');
-      } else {
-        console.error('Video ref is null');
-      }
+      streamRef.current = stream;
+      setIsActive(true);
+      
+      // Set video source after state update to ensure video element is rendered
+      setTimeout(() => {
+        if (videoRef.current && streamRef.current) {
+          videoRef.current.srcObject = streamRef.current;
+          console.log('Camera activated successfully');
+        } else {
+          console.error('Video ref still null after timeout');
+        }
+      }, 100);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to access camera';
       console.error('Camera startup failed:', err);
