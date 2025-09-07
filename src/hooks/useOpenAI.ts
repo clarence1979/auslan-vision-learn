@@ -15,19 +15,25 @@ export interface GestureAnalysisResult {
 
 export const useOpenAI = () => {
   const [config, setConfig] = useState<OpenAIConfig>(() => {
-    const saved = localStorage.getItem('auslan-openai-config');
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem('auslan-openai-config');
+      console.log('Loading config from localStorage:', saved);
+      if (saved) {
         const parsed = JSON.parse(saved);
-        return {
+        console.log('Parsed config:', parsed);
+        const result = {
           apiKey: parsed.apiKey || '',
           isValid: parsed.apiKey?.startsWith('sk-') && parsed.apiKey?.length > 20
         };
-      } catch {
-        return { apiKey: '', isValid: false };
+        console.log('Initial config result:', result);
+        return result;
       }
+      console.log('No saved config found, using defaults');
+      return { apiKey: '', isValid: false };
+    } catch (error) {
+      console.error('Error loading config from localStorage:', error);
+      return { apiKey: '', isValid: false };
     }
-    return { apiKey: '', isValid: false };
   });
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
