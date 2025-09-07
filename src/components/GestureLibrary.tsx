@@ -132,9 +132,16 @@ export const GestureLibrary: React.FC<GestureLibraryProps> = ({
                       <div className="aspect-square bg-muted rounded-lg overflow-hidden">
                         {displayImage ? (
                           <img
-                            src={hasGeneratedImage ? gestureImages[gesture.id] : gesture.imageUrl}
+                            src={hasGeneratedImage ? gestureImages[gesture.id] : `${gesture.imageUrl}?v=${Date.now()}`}
                             alt={`AUSLAN gesture for ${gesture.name}`}
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              console.log(`Image failed to load: ${gesture.name}`, e.currentTarget.src);
+                              e.currentTarget.style.display = 'none';
+                            }}
+                            onLoad={() => {
+                              console.log(`Image loaded successfully: ${gesture.name}`);
+                            }}
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
