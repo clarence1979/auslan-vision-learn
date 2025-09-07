@@ -107,6 +107,8 @@ export const GestureLibrary: React.FC<GestureLibraryProps> = ({
                 const mastered = isMastered(gesture);
                 const isSelected = selectedGesture?.id === gesture.id;
                 const hasGeneratedImage = gestureImages[gesture.id];
+                const hasStaticImage = gesture.imageUrl;
+                const displayImage = hasGeneratedImage || hasStaticImage;
 
                 return (
                   <Card
@@ -128,9 +130,9 @@ export const GestureLibrary: React.FC<GestureLibraryProps> = ({
                     <CardContent className="space-y-3">
                       {/* Gesture image or placeholder */}
                       <div className="aspect-square bg-muted rounded-lg overflow-hidden">
-                        {hasGeneratedImage ? (
+                        {displayImage ? (
                           <img
-                            src={gestureImages[gesture.id]}
+                            src={hasGeneratedImage ? gestureImages[gesture.id] : gesture.imageUrl}
                             alt={`AUSLAN gesture for ${gesture.name}`}
                             className="w-full h-full object-cover"
                           />

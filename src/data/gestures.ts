@@ -11,7 +11,7 @@ export interface Gesture {
 
 export const AUSLAN_GESTURES: Gesture[] = [
   // Alphabet
-  { id: 'a', name: 'A', category: 'alphabet', description: 'Letter A in AUSLAN', instructions: 'Make a fist with thumb pointing up alongside the index finger', difficulty: 'easy' },
+  { id: 'a', name: 'A', category: 'alphabet', description: 'Letter A in AUSLAN', instructions: 'Make a fist with thumb pointing up alongside the index finger', difficulty: 'easy', imageUrl: '/lovable-uploads/32e96632-2de5-4631-861b-31e4dcdd6e3a.png' },
   { id: 'b', name: 'B', category: 'alphabet', description: 'Letter B in AUSLAN', instructions: 'Hold hand flat, fingers together pointing up, thumb across palm', difficulty: 'easy' },
   { id: 'c', name: 'C', category: 'alphabet', description: 'Letter C in AUSLAN', instructions: 'Curve hand into C shape', difficulty: 'easy' },
   { id: 'd', name: 'D', category: 'alphabet', description: 'Letter D in AUSLAN', instructions: 'Index finger up, other fingers and thumb form circle', difficulty: 'easy' },

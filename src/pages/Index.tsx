@@ -191,21 +191,33 @@ const Index = () => {
                     <CardHeader>
                       <CardTitle>Current Gesture</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="text-center">
-                        <div className="text-4xl font-bold mb-2">{selectedGesture.name}</div>
-                        <Badge className="mb-4">
-                          {selectedGesture.category}
-                        </Badge>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          {selectedGesture.description}
-                        </p>
-                        <div className="bg-accent rounded-lg p-4">
-                          <p className="text-sm font-medium">Instructions:</p>
-                          <p className="text-sm">{selectedGesture.instructions}</p>
-                        </div>
-                      </div>
-                    </CardContent>
+                     <CardContent className="space-y-4">
+                       <div className="text-center">
+                         <div className="text-4xl font-bold mb-2">{selectedGesture.name}</div>
+                         <Badge className="mb-4">
+                           {selectedGesture.category}
+                         </Badge>
+                         
+                         {/* Visual guide image */}
+                         {selectedGesture.imageUrl && (
+                           <div className="mb-4">
+                             <img
+                               src={selectedGesture.imageUrl}
+                               alt={`Visual guide for AUSLAN gesture ${selectedGesture.name}`}
+                               className="mx-auto w-32 h-32 object-cover rounded-lg border"
+                             />
+                           </div>
+                         )}
+                         
+                         <p className="text-sm text-muted-foreground mb-4">
+                           {selectedGesture.description}
+                         </p>
+                         <div className="bg-accent rounded-lg p-4">
+                           <p className="text-sm font-medium">Instructions:</p>
+                           <p className="text-sm">{selectedGesture.instructions}</p>
+                         </div>
+                       </div>
+                     </CardContent>
                   </Card>
 
                   {/* Feedback */}
