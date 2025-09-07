@@ -24,6 +24,8 @@ import { useFingerDetection } from '@/hooks/useFingerDetection';
 import { Gesture } from '@/data/gestures';
 
 const Index = () => {
+  console.log('Index component rendering');
+  
   const { toast } = useToast();
   const { config, analyzeGesture, isAnalyzing, error } = useOpenAI();
   const { recordAttempt, getSuccessRate, getMasteredCount } = useProgress();
