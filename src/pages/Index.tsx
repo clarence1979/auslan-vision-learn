@@ -37,6 +37,19 @@ const Index = () => {
     console.log('Selected gesture:', selectedGesture?.name);
     console.log('Config:', { isValid: config.isValid, hasApiKey: !!config.apiKey });
     console.log('Config API Key length:', config.apiKey.length);
+    
+    // Check localStorage directly
+    const savedConfig = localStorage.getItem('auslan-openai-config');
+    console.log('Direct localStorage check:', savedConfig);
+    if (savedConfig) {
+      try {
+        const parsed = JSON.parse(savedConfig);
+        console.log('Parsed localStorage data:', parsed);
+      } catch (e) {
+        console.log('Error parsing localStorage:', e);
+      }
+    }
+    
     console.log('================================');
     
     if (!selectedGesture) {
