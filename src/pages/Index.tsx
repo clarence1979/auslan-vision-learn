@@ -33,6 +33,12 @@ const Index = () => {
   const [lastResult, setLastResult] = useState<any>(null);
 
   const handleGestureCapture = async (imageData: string) => {
+    console.log('Gesture capture triggered', { 
+      selectedGesture: selectedGesture?.name, 
+      configValid: config.isValid,
+      apiKey: config.apiKey ? 'Present' : 'Missing'
+    });
+    
     if (!selectedGesture) {
       toast({
         title: "No gesture selected",
@@ -43,6 +49,7 @@ const Index = () => {
     }
 
     if (!config.isValid) {
+      console.log('API key validation failed:', config);
       toast({
         title: "API key required",
         description: "Please configure your OpenAI API key in settings.",
