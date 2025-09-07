@@ -167,8 +167,16 @@ Be encouraging and educational in your feedback. Consider hand position, finger 
       // Try to parse JSON response
       try {
         const result = JSON.parse(content);
-        return result;
-      } catch {
+        console.log('Parsed OpenAI result:', result);
+        return {
+          recognized: result.recognized || false,
+          gesture: result.gesture || 'unknown',
+          confidence: result.confidence || 0,
+          feedback: result.feedback || content,
+          suggestions: result.suggestions || []
+        };
+      } catch (parseError) {
+        console.log('JSON parse failed, treating as plain text:', parseError);
         // Fallback if response isn't JSON
         return {
           recognized: false,
