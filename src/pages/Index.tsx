@@ -33,7 +33,11 @@ const Index = () => {
   const [lastResult, setLastResult] = useState<any>(null);
 
   const handleGestureCapture = async (imageData: string) => {
+    console.log('=== GESTURE ANALYSIS START ===');
+    console.log('Received image data length:', imageData.length);
+    
     if (!selectedGesture) {
+      console.log('No gesture selected');
       toast({
         title: "No gesture selected",
         description: "Please select a gesture to practice first.",
@@ -43,6 +47,7 @@ const Index = () => {
     }
 
     if (!config.isValid) {
+      console.log('Config invalid:', config);
       toast({
         title: "API key required",
         description: "Please configure your OpenAI API key in settings.",
@@ -52,8 +57,11 @@ const Index = () => {
       return;
     }
 
+    console.log('Starting OpenAI analysis for gesture:', selectedGesture.name);
+
     try {
       const result = await analyzeGesture(imageData, selectedGesture.name);
+      console.log('Analysis result:', result);
       setLastResult(result);
       
       // Record the attempt
@@ -67,12 +75,14 @@ const Index = () => {
       });
       
     } catch (err) {
+      console.error('Analysis failed:', err);
       toast({
         title: "Analysis failed",
         description: err instanceof Error ? err.message : "Failed to analyze gesture",
         variant: "destructive"
       });
     }
+    console.log('=== GESTURE ANALYSIS END ===');
   };
 
   const handleGestureSelect = (gesture: Gesture) => {
@@ -167,8 +177,8 @@ const Index = () => {
                     <CardContent>
                       <Camera 
                         onCapture={selectedGesture ? handleGestureCapture : undefined}
-                        autoCapture={false}
-                        captureInterval={5000}
+                        autoCapture={!!selectedGesture}
+                        captureInterval={3000}
                       />
                     </CardContent>
                   </Card>
@@ -188,20 +198,16 @@ const Index = () => {
                            {selectedGesture.category}
                          </Badge>
                          
-                          {/* Visual guide image */}
-                          {selectedGesture.imageUrl && (
-                            <div className="mb-4">
-                              <img
-                                src={selectedGesture.imageUrl}
-                                alt={`Visual guide for AUSLAN gesture ${selectedGesture.name}`}
-                                className="mx-auto w-32 h-32 object-cover rounded-lg border"
-                                loading="lazy"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display = 'none';
-                                }}
-                              />
-                            </div>
-                          )}
+                         {/* Visual guide image */}
+                         {selectedGesture.imageUrl && (
+                           <div className="mb-4">
+                             <img
+                               src={selectedGesture.imageUrl}
+                               alt={`Visual guide for AUSLAN gesture ${selectedGesture.name}`}
+                               className="mx-auto w-32 h-32 object-cover rounded-lg border"
+                             />
+                           </div>
+                         )}
                          
                          <p className="text-sm text-muted-foreground mb-4">
                            {selectedGesture.description}
