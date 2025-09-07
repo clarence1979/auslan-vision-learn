@@ -142,27 +142,6 @@ const Index = () => {
                     className="h-8 w-auto"
                   />
                 </a>
-                
-                {/* PayPal Donation Button */}
-                <form action="https://www.paypal.com/donate" method="post" target="_top" className="ml-4">
-                  <input type="hidden" name="hosted_button_id" value="PSXE6LDM3ZJDC" />
-                  <input 
-                    type="image" 
-                    src="https://www.paypalobjects.com/en_AU/i/btn/btn_donateCC_LG.gif" 
-                    style={{border: 0}} 
-                    name="submit" 
-                    title="PayPal - The safer, easier way to pay online!" 
-                    alt="Donate with PayPal button" 
-                    className="h-8"
-                  />
-                  <img 
-                    alt="" 
-                    style={{border: 0}} 
-                    src="https://www.paypal.com/en_AU/i/scr/pixel.gif" 
-                    width={1} 
-                    height={1} 
-                  />
-                </form>
               </div>
             </div>
             
@@ -177,6 +156,27 @@ const Index = () => {
                   <span>Success rate: {getSuccessRate()}%</span>
                 </div>
               </div>
+              
+              {/* PayPal Donation Button */}
+              <form action="https://www.paypal.com/donate" method="post" target="_top" className="flex items-center">
+                <input type="hidden" name="hosted_button_id" value="PSXE6LDM3ZJDC" />
+                <input 
+                  type="image" 
+                  src="https://www.paypalobjects.com/en_AU/i/btn/btn_donateCC_LG.gif" 
+                  style={{border: 0}} 
+                  name="submit" 
+                  title="PayPal - The safer, easier way to pay online!" 
+                  alt="Donate with PayPal button" 
+                  className="h-10 hover:opacity-80 transition-opacity"
+                />
+                <img 
+                  alt="" 
+                  style={{border: 0}} 
+                  src="https://www.paypal.com/en_AU/i/scr/pixel.gif" 
+                  width={1} 
+                  height={1} 
+                />
+              </form>
               
               <Button
                 variant="outline"
