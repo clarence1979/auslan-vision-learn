@@ -51,16 +51,16 @@ export const AUSLAN_GESTURES: Gesture[] = [
   { id: '9', name: '9', category: 'numbers', description: 'Number nine in AUSLAN', instructions: 'Touch thumb to index finger, other fingers up', difficulty: 'easy', imageUrl: '/src/assets/auslan-9.jpg' },
   
   // Greetings
-  { id: 'hello', name: 'Hello', category: 'greetings', description: 'Hello greeting in AUSLAN', instructions: 'Wave hand from side to side with palm facing forward', difficulty: 'easy', imageUrl: '/src/assets/auslan-hello.jpg' },
-  { id: 'goodbye', name: 'Goodbye', category: 'greetings', description: 'Goodbye gesture in AUSLAN', instructions: 'Wave hand with fingers closing and opening', difficulty: 'easy', imageUrl: '/src/assets/auslan-goodbye.jpg' },
-  { id: 'thankyou', name: 'Thank You', category: 'greetings', description: 'Thank you in AUSLAN', instructions: 'Touch fingertips to chin then move hand forward', difficulty: 'medium', imageUrl: '/src/assets/auslan-thankyou.jpg' },
-  { id: 'please', name: 'Please', category: 'greetings', description: 'Please in AUSLAN', instructions: 'Rub palm in circular motion on chest', difficulty: 'medium', imageUrl: '/src/assets/auslan-please.jpg' },
+  { id: 'hello', name: 'Hello', category: 'greetings', description: 'Hello greeting in AUSLAN', instructions: 'Wave hand from side to side with palm facing forward', difficulty: 'easy', imageUrl: '/auslan-hello.jpg' },
+  { id: 'goodbye', name: 'Goodbye', category: 'greetings', description: 'Goodbye gesture in AUSLAN', instructions: 'Wave hand with fingers closing and opening', difficulty: 'easy', imageUrl: '/auslan-goodbye.jpg' },
+  { id: 'thankyou', name: 'Thank You', category: 'greetings', description: 'Thank you in AUSLAN', instructions: 'Touch fingertips to chin then move hand forward', difficulty: 'medium', imageUrl: '/auslan-thankyou.jpg' },
+  { id: 'please', name: 'Please', category: 'greetings', description: 'Please in AUSLAN', instructions: 'Rub palm in circular motion on chest', difficulty: 'medium', imageUrl: '/auslan-please.jpg' },
   
   // Common words
-  { id: 'yes', name: 'Yes', category: 'common', description: 'Yes in AUSLAN', instructions: 'Nod fist up and down', difficulty: 'easy', imageUrl: '/src/assets/auslan-yes.jpg' },
-  { id: 'no', name: 'No', category: 'common', description: 'No in AUSLAN', instructions: 'Index and middle finger tap thumb', difficulty: 'easy', imageUrl: '/src/assets/auslan-no.jpg' },
-  { id: 'water', name: 'Water', category: 'common', description: 'Water in AUSLAN', instructions: 'Tap index finger on side of mouth', difficulty: 'medium', imageUrl: '/src/assets/auslan-water.jpg' },
-  { id: 'food', name: 'Food', category: 'common', description: 'Food in AUSLAN', instructions: 'Bring fingertips to mouth repeatedly', difficulty: 'medium', imageUrl: '/src/assets/auslan-food.jpg' },
+  { id: 'yes', name: 'Yes', category: 'common', description: 'Yes in AUSLAN', instructions: 'Nod fist up and down', difficulty: 'easy', imageUrl: '/auslan-yes.jpg' },
+  { id: 'no', name: 'No', category: 'common', description: 'No in AUSLAN', instructions: 'Index and middle finger tap thumb', difficulty: 'easy', imageUrl: '/auslan-no.jpg' },
+  { id: 'water', name: 'Water', category: 'common', description: 'Water in AUSLAN', instructions: 'Tap index finger on side of mouth', difficulty: 'medium', imageUrl: '/auslan-water.jpg' },
+  { id: 'food', name: 'Food', category: 'common', description: 'Food in AUSLAN', instructions: 'Bring fingertips to mouth repeatedly', difficulty: 'medium', imageUrl: '/auslan-food.jpg' },
 ];
 
 export const GESTURE_CATEGORIES = [
