@@ -120,11 +120,29 @@ const Index = () => {
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-primary">AUSLAN Vision Learn</h1>
-              <p className="text-sm text-muted-foreground">
-                Learn Australian Sign Language with AI-powered gesture recognition
-              </p>
+            <div className="flex items-center gap-4">
+              <div>
+                <h1 className="text-2xl font-bold text-primary">AUSLAN Vision Learn</h1>
+                <p className="text-sm text-muted-foreground">
+                  Learn Australian Sign Language with AI-powered gesture recognition
+                </p>
+              </div>
+              
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Proudly made by:</span>
+                <a 
+                  href="https://clarence.guru" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:opacity-80 transition-opacity"
+                >
+                  <img 
+                    src="/lovable-uploads/a349d04b-5577-4c13-bf4e-5316c1e5782e.png" 
+                    alt="Clarence's Solutions" 
+                    className="h-8 w-auto"
+                  />
+                </a>
+              </div>
             </div>
             
             <div className="flex items-center gap-4">
