@@ -165,7 +165,11 @@ const Index = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <Camera onCapture={handleGestureCapture} />
+                      <Camera 
+                        onCapture={handleGestureCapture} 
+                        autoCapture={true}
+                        captureInterval={3000}
+                      />
                     </CardContent>
                   </Card>
                 </div>

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Camera as CameraIcon, CameraOff, RotateCcw, AlertCircle } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { Camera as CameraIcon, CameraOff, RotateCcw, AlertCircle, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useCamera } from '@/hooks/useCamera';
@@ -7,9 +7,16 @@ import { useCamera } from '@/hooks/useCamera';
 interface CameraProps {
   onCapture?: (imageData: string) => void;
   className?: string;
+  autoCapture?: boolean;
+  captureInterval?: number; // in milliseconds
 }
 
-export const Camera: React.FC<CameraProps> = ({ onCapture, className = '' }) => {
+export const Camera: React.FC<CameraProps> = ({ 
+  onCapture, 
+  className = '', 
+  autoCapture = false, 
+  captureInterval = 3000 
+}) => {
   const {
     videoRef,
     canvasRef,
@@ -23,12 +30,43 @@ export const Camera: React.FC<CameraProps> = ({ onCapture, className = '' }) => 
     devices
   } = useCamera();
 
+  const autoCaptureRef = useRef<NodeJS.Timeout | null>(null);
+
   const handleCapture = () => {
     const imageData = captureFrame();
     if (imageData && onCapture) {
       onCapture(imageData);
     }
   };
+
+  // Auto-capture effect
+  useEffect(() => {
+    if (autoCapture && isActive && onCapture) {
+      autoCaptureRef.current = setInterval(() => {
+        handleCapture();
+      }, captureInterval);
+
+      return () => {
+        if (autoCaptureRef.current) {
+          clearInterval(autoCaptureRef.current);
+        }
+      };
+    } else {
+      if (autoCaptureRef.current) {
+        clearInterval(autoCaptureRef.current);
+        autoCaptureRef.current = null;
+      }
+    }
+  }, [autoCapture, isActive, onCapture, captureInterval]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (autoCaptureRef.current) {
+        clearInterval(autoCaptureRef.current);
+      }
+    };
+  }, []);
 
   return (
     <Card className={`relative overflow-hidden ${className}`}>
@@ -90,9 +128,17 @@ export const Camera: React.FC<CameraProps> = ({ onCapture, className = '' }) => 
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-4 left-4 right-4">
               <div className="bg-background/80 rounded-lg p-2 text-center">
-                <p className="text-xs text-foreground">
-                  Position your hand clearly in view
-                </p>
+                <div className="flex items-center justify-center gap-2">
+                  {autoCapture && (
+                    <Zap className="h-3 w-3 text-primary animate-pulse" />
+                  )}
+                  <p className="text-xs text-foreground">
+                    {autoCapture 
+                      ? `Auto-analyzing gesture every ${captureInterval/1000}s`
+                      : "Position your hand clearly in view"
+                    }
+                  </p>
+                </div>
               </div>
             </div>
             
@@ -109,14 +155,25 @@ export const Camera: React.FC<CameraProps> = ({ onCapture, className = '' }) => 
       {/* Camera controls */}
       {isActive && (
         <div className="flex gap-2 p-4 bg-background border-t">
-          <Button
-            onClick={handleCapture}
-            disabled={!onCapture}
-            className="flex-1"
-          >
-            <CameraIcon className="h-4 w-4 mr-2" />
-            Capture Gesture
-          </Button>
+          {!autoCapture && (
+            <Button
+              onClick={handleCapture}
+              disabled={!onCapture}
+              className="flex-1"
+            >
+              <CameraIcon className="h-4 w-4 mr-2" />
+              Capture Gesture
+            </Button>
+          )}
+          
+          {autoCapture && (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Zap className="h-4 w-4 text-primary animate-pulse" />
+                <span>Auto-capturing enabled</span>
+              </div>
+            </div>
+          )}
           
           {devices.length > 1 && (
             <Button
