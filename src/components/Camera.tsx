@@ -33,10 +33,16 @@ export const Camera: React.FC<CameraProps> = ({
   const autoCaptureRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleCapture = useCallback(() => {
+    console.log('=== CAMERA CAPTURE ===');
     const imageData = captureFrame();
+    console.log('Image captured:', imageData ? 'Yes' : 'No');
     if (imageData && onCapture) {
+      console.log('Calling onCapture callback');
       onCapture(imageData);
+    } else {
+      console.log('No capture - imageData:', !!imageData, 'onCapture:', !!onCapture);
     }
+    console.log('=====================');
   }, [captureFrame, onCapture]);
 
   // Auto-capture effect

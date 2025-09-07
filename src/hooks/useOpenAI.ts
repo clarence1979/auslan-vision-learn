@@ -45,7 +45,13 @@ export const useOpenAI = () => {
             apiKey: parsed.apiKey || '',
             isValid: parsed.apiKey?.startsWith('sk-') && parsed.apiKey?.length > 20
           };
-          setConfig(newConfig);
+          setConfig(prevConfig => {
+            // Only update if the config has actually changed
+            if (prevConfig.apiKey !== newConfig.apiKey || prevConfig.isValid !== newConfig.isValid) {
+              return newConfig;
+            }
+            return prevConfig;
+          });
         }
       } catch (error) {
         console.error('Error handling storage change:', error);

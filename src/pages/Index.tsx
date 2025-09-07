@@ -33,7 +33,11 @@ const Index = () => {
   const [lastResult, setLastResult] = useState<any>(null);
 
   const handleGestureCapture = async (imageData: string) => {
+    console.log('=== GESTURE ANALYSIS START ===');
+    console.log('Received image data length:', imageData.length);
+    
     if (!selectedGesture) {
+      console.log('No gesture selected');
       toast({
         title: "No gesture selected",
         description: "Please select a gesture to practice first.",
@@ -43,6 +47,7 @@ const Index = () => {
     }
 
     if (!config.isValid) {
+      console.log('Config invalid:', config);
       toast({
         title: "API key required",
         description: "Please configure your OpenAI API key in settings.",
@@ -52,8 +57,11 @@ const Index = () => {
       return;
     }
 
+    console.log('Starting OpenAI analysis for gesture:', selectedGesture.name);
+
     try {
       const result = await analyzeGesture(imageData, selectedGesture.name);
+      console.log('Analysis result:', result);
       setLastResult(result);
       
       // Record the attempt
@@ -67,12 +75,14 @@ const Index = () => {
       });
       
     } catch (err) {
+      console.error('Analysis failed:', err);
       toast({
         title: "Analysis failed",
         description: err instanceof Error ? err.message : "Failed to analyze gesture",
         variant: "destructive"
       });
     }
+    console.log('=== GESTURE ANALYSIS END ===');
   };
 
   const handleGestureSelect = (gesture: Gesture) => {
