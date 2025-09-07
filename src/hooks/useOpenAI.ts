@@ -102,7 +102,7 @@ export const useOpenAI = () => {
           'Authorization': `Bearer ${config.apiKey}`
         },
         body: JSON.stringify({
-          model: 'gpt-4.1-2025-04-14',
+          model: 'gpt-4o',
           messages: [
             {
               role: 'system',
@@ -139,12 +139,21 @@ Be encouraging and educational in your feedback. Consider hand position, finger 
       });
 
       if (!response.ok) {
+        const errorData = await response.text();
+        console.error('OpenAI API Error Details:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorData
+        });
+        
         if (response.status === 401) {
           throw new Error('Invalid API key. Please check your OpenAI API key.');
+        } else if (response.status === 403) {
+          throw new Error('API key does not have access to vision models. Please check your OpenAI plan.');
         } else if (response.status === 429) {
           throw new Error('Rate limit exceeded. Please try again in a moment.');
         } else {
-          throw new Error(`OpenAI API error: ${response.status}`);
+          throw new Error(`OpenAI API error: ${response.status} - ${errorData}`);
         }
       }
 
