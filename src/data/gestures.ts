@@ -38,7 +38,7 @@ export const AUSLAN_GESTURES: Gesture[] = [
   { id: 'y', name: 'Y', category: 'alphabet', description: 'Letter Y in AUSLAN', instructions: 'Thumb and pinky up, other fingers folded', difficulty: 'easy', imageUrl: '/auslan-y.jpg' },
   { id: 'z', name: 'Z', category: 'alphabet', description: 'Letter Z in AUSLAN', instructions: 'Index finger traces Z motion in air', difficulty: 'medium', imageUrl: '/auslan-z.jpg' },
   
-  // Numbers
+  // Numbers (Updated with user-provided images)
   { id: '0', name: '0', category: 'numbers', description: 'Number zero in AUSLAN', instructions: 'Make a fist with thumb tucked inside', difficulty: 'easy', imageUrl: '/lovable-uploads/6741ad7c-3583-4ce4-ac19-a77e5fc6602a.png' },
   { id: '1', name: '1', category: 'numbers', description: 'Number one in AUSLAN', instructions: 'Hold up index finger', difficulty: 'easy', imageUrl: '/lovable-uploads/d3ce1f1e-150b-407c-a12e-49698438c4ce.png' },
   { id: '2', name: '2', category: 'numbers', description: 'Number two in AUSLAN', instructions: 'Hold up index and middle fingers', difficulty: 'easy', imageUrl: '/lovable-uploads/46e2aa27-1d5c-4359-9b13-e5fceb30827d.png' },
