@@ -186,6 +186,21 @@ const Index = () => {
                 />
               </form>
               
+              {/* API Key Status Indicator */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSettings(true)}
+                className={`w-10 h-10 rounded-full p-0 ${
+                  config.isValid 
+                    ? 'bg-green-500 hover:bg-green-600 border-green-500' 
+                    : 'bg-red-500 hover:bg-red-600 border-red-500'
+                }`}
+                title={config.isValid ? 'API Key configured' : 'API Key required'}
+              >
+                <div className="w-2 h-2 bg-white rounded-full" />
+              </Button>
+              
               <Button
                 variant="outline"
                 size="sm"
