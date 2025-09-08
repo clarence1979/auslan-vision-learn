@@ -48,7 +48,7 @@ export const AUSLAN_GESTURES: Gesture[] = [
   { id: '6', name: '6', category: 'numbers', description: 'Number six in AUSLAN', instructions: 'Touch thumb to pinky, other fingers up', difficulty: 'easy', imageUrl: '/lovable-uploads/b7a45057-6666-45bf-bc76-36edbf4929e8.png' },
   { id: '7', name: '7', category: 'numbers', description: 'Number seven in AUSLAN', instructions: 'Touch thumb to ring finger, other fingers up', difficulty: 'easy', imageUrl: '/lovable-uploads/89a25ec4-5258-46f7-9ee3-5d78e649957c.png' },
   { id: '8', name: '8', category: 'numbers', description: 'Number eight in AUSLAN', instructions: 'Touch thumb to middle finger, other fingers up', difficulty: 'easy', imageUrl: '/lovable-uploads/85a0e357-9f98-4ac7-b11a-8aff87064b0f.png' },
-  { id: '9', name: '9', category: 'numbers', description: 'Number nine in AUSLAN', instructions: 'Touch thumb to index finger, other fingers up', difficulty: 'easy', imageUrl: '/auslan-9-new.jpg' },
+  { id: '9', name: '9', category: 'numbers', description: 'Number nine in AUSLAN', instructions: 'Touch thumb to index finger, other fingers up', difficulty: 'easy', imageUrl: '/lovable-uploads/6203ff6c-0af4-45c4-a5b5-bb8693b7e87e.png' },
   
   // Greetings
   { id: 'hello', name: 'Hello', category: 'greetings', description: 'Hello greeting in AUSLAN', instructions: 'Wave hand from side to side with palm facing forward', difficulty: 'easy' },
