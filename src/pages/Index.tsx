@@ -116,12 +116,9 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-enhanced">
-      {/* Hero gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-hero pointer-events-none" />
-      
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="relative border-b bg-card/80 backdrop-blur-sm">
+      <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -200,7 +197,7 @@ const Index = () => {
         </div>
       </header>
 
-      <div className="relative container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-6">
         {/* API Key Warning */}
         {!config.isValid && (
           <Alert className="mb-6">
