@@ -193,7 +193,7 @@ const Index = () => {
                 onClick={() => setShowSettings(true)}
               >
                 <Settings className="h-4 w-4 mr-2" />
-                Settings
+                Settings and Privacy
               </Button>
             </div>
           </div>
