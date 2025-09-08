@@ -51,6 +51,14 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
 
+    /* Beautiful educational background gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary) / 0.05), hsl(var(--learning) / 0.05));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--accent) / 0.3));
+    --gradient-hero: radial-gradient(ellipse at top, hsl(var(--primary) / 0.1), transparent 60%);
+    --pattern-dots: radial-gradient(circle at 2px 2px, hsl(var(--primary) / 0.1) 1px, transparent 0);
+    --pattern-grid: linear-gradient(hsl(var(--primary) / 0.05) 1px, transparent 1px), 
+                    linear-gradient(90deg, hsl(var(--primary) / 0.05) 1px, transparent 1px);
+
     --sidebar-background: 0 0% 98%;
 
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -106,6 +114,14 @@ All colors MUST be HSL.
     --input: 217.2 32.6% 17.5%;
     --ring: 198 89% 65%;
     
+    /* Dark mode background enhancements */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--learning) / 0.08));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--accent) / 0.1));
+    --gradient-hero: radial-gradient(ellipse at top, hsl(var(--primary) / 0.15), transparent 60%);
+    --pattern-dots: radial-gradient(circle at 2px 2px, hsl(var(--primary) / 0.15) 1px, transparent 0);
+    --pattern-grid: linear-gradient(hsl(var(--primary) / 0.08) 1px, transparent 1px), 
+                    linear-gradient(90deg, hsl(var(--primary) / 0.08) 1px, transparent 1px);
+    
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -124,6 +140,60 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    background: var(--gradient-subtle);
+    background-attachment: fixed;
     min-height: 100vh;
+  }
+
+  /* Enhanced background utilities */
+  .bg-pattern-dots {
+    background-image: var(--pattern-dots);
+    background-size: 20px 20px;
+  }
+
+  .bg-pattern-grid {
+    background-image: var(--pattern-grid);
+    background-size: 40px 40px;
+  }
+
+  .bg-gradient-hero {
+    background-image: var(--gradient-hero);
+  }
+
+  .bg-gradient-primary {
+    background-image: var(--gradient-primary);
+  }
+
+  .bg-enhanced {
+    background: var(--gradient-subtle);
+    position: relative;
+  }
+
+  .bg-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: var(--pattern-dots);
+    background-size: 24px 24px;
+    opacity: 1;
+    pointer-events: none;
+  }
+
+  /* Animated floating elements for visual interest */
+  .floating-element {
+    position: absolute;
+    background: hsl(var(--primary) / 0.05);
+    border-radius: 50%;
+    animation: float 8s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    25% { transform: translateY(-20px) rotate(90deg); }
+    50% { transform: translateY(-10px) rotate(180deg); }
+    75% { transform: translateY(-15px) rotate(270deg); }
   }
 }

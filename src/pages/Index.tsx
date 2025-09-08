@@ -118,9 +118,18 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-enhanced">
+      {/* Floating background elements */}
+      <div className="floating-element w-32 h-32 top-10 left-10 opacity-30" style={{animationDelay: '0s'}} />
+      <div className="floating-element w-24 h-24 top-32 right-20 opacity-20" style={{animationDelay: '2s'}} />
+      <div className="floating-element w-40 h-40 bottom-20 left-1/4 opacity-25" style={{animationDelay: '4s'}} />
+      <div className="floating-element w-28 h-28 bottom-40 right-1/3 opacity-15" style={{animationDelay: '6s'}} />
+      
+      {/* Hero gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-hero pointer-events-none" />
+      
       {/* Header */}
-      <header className="border-b bg-card">
+      <header className="relative border-b bg-card/80 backdrop-blur-sm shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -214,7 +223,7 @@ const Index = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6">
+      <div className="relative container mx-auto px-4 py-6 bg-pattern-grid">
         {/* API Key Warning */}
         {!config.isValid && (
           <Alert className="mb-6">
