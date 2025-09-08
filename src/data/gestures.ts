@@ -44,7 +44,7 @@ export const AUSLAN_GESTURES: Gesture[] = [
   { id: '2', name: '2', category: 'numbers', description: 'Number two in AUSLAN', instructions: 'Hold up index and middle fingers', difficulty: 'easy', imageUrl: '/lovable-uploads/46e2aa27-1d5c-4359-9b13-e5fceb30827d.png' },
   { id: '3', name: '3', category: 'numbers', description: 'Number three in AUSLAN', instructions: 'Hold up index, middle, and ring fingers in a clear three gesture', difficulty: 'easy', imageUrl: '/lovable-uploads/68716246-575c-4243-b66e-70b3a2a44f11.png' },
   { id: '4', name: '4', category: 'numbers', description: 'Number four in AUSLAN', instructions: 'Hold up four fingers clearly, with thumb tucked down', difficulty: 'easy', imageUrl: '/lovable-uploads/5f3c1737-afa9-4d5a-9b8e-b52140e789f0.png' },
-  { id: '5', name: '5', category: 'numbers', description: 'Number five in AUSLAN', instructions: 'Hold up all five fingers', difficulty: 'easy', imageUrl: '/auslan-5-new.jpg' },
+  { id: '5', name: '5', category: 'numbers', description: 'Number five in AUSLAN', instructions: 'Hold up all five fingers', difficulty: 'easy', imageUrl: '/lovable-uploads/85170a27-5004-4f27-b099-6e45dcd5b6d8.png' },
   { id: '6', name: '6', category: 'numbers', description: 'Number six in AUSLAN', instructions: 'Touch thumb to pinky, other fingers up', difficulty: 'easy', imageUrl: '/auslan-6-new.jpg' },
   { id: '7', name: '7', category: 'numbers', description: 'Number seven in AUSLAN', instructions: 'Touch thumb to ring finger, other fingers up', difficulty: 'easy', imageUrl: '/auslan-7-new.jpg' },
   { id: '8', name: '8', category: 'numbers', description: 'Number eight in AUSLAN', instructions: 'Touch thumb to middle finger, other fingers up', difficulty: 'easy', imageUrl: '/auslan-8-new.jpg' },
