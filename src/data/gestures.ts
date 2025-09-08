@@ -54,7 +54,7 @@ export const AUSLAN_GESTURES: Gesture[] = [
   { id: 'hello', name: 'Hello', category: 'greetings', description: 'Hello greeting in AUSLAN', instructions: 'Wave hand from side to side with palm facing forward', difficulty: 'easy', imageUrl: '/lovable-uploads/4fc0ff3a-5b8d-4fcf-ac25-6b7cbefcf813.png' },
   { id: 'goodbye', name: 'Goodbye', category: 'greetings', description: 'Goodbye gesture in AUSLAN', instructions: 'Wave hand with fingers closing and opening', difficulty: 'easy', imageUrl: '/lovable-uploads/18aad0b2-457f-4797-a7ff-c48c8bc19d68.png' },
   { id: 'thankyou', name: 'Thank You', category: 'greetings', description: 'Thank you in AUSLAN', instructions: 'Touch fingertips to chin then move hand forward', difficulty: 'medium', imageUrl: '/lovable-uploads/0b2d02b5-2de8-4437-a477-5f482861485b.png' },
-  { id: 'please', name: 'Please', category: 'greetings', description: 'Please in AUSLAN', instructions: 'Rub palm in circular motion on chest', difficulty: 'medium' },
+  { id: 'please', name: 'Please', category: 'greetings', description: 'Please in AUSLAN', instructions: 'Rub palm in circular motion on chest', difficulty: 'medium', imageUrl: '/lovable-uploads/525d2199-70c8-435c-ad69-65aabf2272e8.png' },
   
   // Common words
   { id: 'yes', name: 'Yes', category: 'common', description: 'Yes in AUSLAN', instructions: 'Nod fist up and down', difficulty: 'easy' },
