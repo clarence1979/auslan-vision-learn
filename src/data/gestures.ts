@@ -40,7 +40,7 @@ export const AUSLAN_GESTURES: Gesture[] = [
   
   // Numbers
   { id: '0', name: '0', category: 'numbers', description: 'Number zero in AUSLAN', instructions: 'Make a fist with thumb tucked inside', difficulty: 'easy', imageUrl: '/lovable-uploads/6741ad7c-3583-4ce4-ac19-a77e5fc6602a.png' },
-  { id: '1', name: '1', category: 'numbers', description: 'Number one in AUSLAN', instructions: 'Hold up index finger', difficulty: 'easy', imageUrl: '/lovable-uploads/21647cf5-26e1-44f3-a918-0310cf59d4c8.png' },
+  { id: '1', name: '1', category: 'numbers', description: 'Number one in AUSLAN', instructions: 'Hold up index finger', difficulty: 'easy', imageUrl: '/lovable-uploads/d3ce1f1e-150b-407c-a12e-49698438c4ce.png' },
   { id: '2', name: '2', category: 'numbers', description: 'Number two in AUSLAN', instructions: 'Hold up index and middle fingers', difficulty: 'easy', imageUrl: '/lovable-uploads/46e2aa27-1d5c-4359-9b13-e5fceb30827d.png' },
   { id: '3', name: '3', category: 'numbers', description: 'Number three in AUSLAN', instructions: 'Hold up index, middle, and ring fingers in a clear three gesture', difficulty: 'easy', imageUrl: '/lovable-uploads/68716246-575c-4243-b66e-70b3a2a44f11.png' },
   { id: '4', name: '4', category: 'numbers', description: 'Number four in AUSLAN', instructions: 'Hold up four fingers clearly, with thumb tucked down', difficulty: 'easy', imageUrl: '/lovable-uploads/5f3c1737-afa9-4d5a-9b8e-b52140e789f0.png' },
