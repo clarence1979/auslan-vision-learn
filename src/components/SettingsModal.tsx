@@ -155,13 +155,29 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </Alert>
             )}
 
-            <Button
-              onClick={handleSaveApiKey}
-              disabled={isValidating || !tempApiKey.trim()}
-              className="w-full"
-            >
-              {isValidating ? "Validating..." : "Save API Key"}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleSaveApiKey}
+                disabled={isValidating || !tempApiKey.trim()}
+                className="flex-1"
+              >
+                {isValidating ? "Validating..." : "Save API Key"}
+              </Button>
+              
+              {config.apiKey && (
+                <Button
+                  onClick={() => {
+                    setApiKey('');
+                    setTempApiKey('');
+                    setValidationResult(null);
+                  }}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Clear API Key
+                </Button>
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="progress" className="space-y-4">
