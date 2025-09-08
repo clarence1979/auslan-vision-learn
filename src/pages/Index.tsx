@@ -22,6 +22,7 @@ import { useOpenAI } from '@/hooks/useOpenAI';
 import { useProgress } from '@/hooks/useProgress';
 import { useFingerDetection } from '@/hooks/useFingerDetection';
 import { Gesture } from '@/data/gestures';
+import auslanLogo from '@/assets/auslan-logo.png';
 
 const Index = () => {
   console.log('Index component rendering');
@@ -121,6 +122,11 @@ const Index = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
+              <img 
+                src={auslanLogo} 
+                alt="AUSLAN Vision Learn Logo" 
+                className="h-12 w-12"
+              />
               <div>
                 <h1 className="text-2xl font-bold text-primary">AUSLAN Vision Learn</h1>
                 <p className="text-sm text-muted-foreground">
