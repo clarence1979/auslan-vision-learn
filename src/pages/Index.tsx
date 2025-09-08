@@ -37,6 +37,8 @@ const Index = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [lastResult, setLastResult] = useState<any>(null);
 
+  console.log('All hooks initialized successfully');
+
   const handleGestureCapture = async (imageData: string) => {
     console.log('=== GESTURE ANALYSIS START ===');
     console.log('Received image data length:', imageData.length);
