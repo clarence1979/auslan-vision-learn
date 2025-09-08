@@ -59,11 +59,12 @@ export const useFingerDetection = () => {
     let motionPixelCount = 0;
     let totalPixels = 0;
     
-    // Define skin tone ranges (simplified)
+    // More inclusive skin tone ranges
     const skinTones = [
-      { rMin: 95, rMax: 255, gMin: 40, gMax: 100, bMin: 20, bMax: 95 },   // Light skin
-      { rMin: 45, rMax: 95, gMin: 20, gMax: 50, bMin: 5, bMax: 35 },      // Medium skin  
-      { rMin: 20, rMax: 60, gMin: 10, gMax: 30, bMin: 5, bMax: 20 }       // Dark skin
+      { rMin: 80, rMax: 255, gMin: 30, gMax: 120, bMin: 15, bMax: 110 },   // Light skin (more inclusive)
+      { rMin: 40, rMax: 120, gMin: 15, gMax: 70, bMin: 5, bMax: 50 },      // Medium skin (wider range)
+      { rMin: 15, rMax: 80, gMin: 8, gMax: 40, bMin: 3, bMax: 30 },        // Dark skin (more inclusive)
+      { rMin: 100, rMax: 200, gMin: 50, gMax: 150, bMin: 40, bMax: 120 }   // Additional range for varied lighting
     ];
     
     // Sample pixels (check every 4th pixel for performance)
@@ -104,10 +105,10 @@ export const useFingerDetection = () => {
     const skinPercentage = totalPixels > 0 ? skinPixelCount / totalPixels : 0;
     const motionPercentage = totalPixels > 0 ? motionPixelCount / totalPixels : 0;
     
-    // Require at least 5% skin-tone pixels and some edge definition for hand detection
-    const hasSignificantSkinTone = skinPercentage > 0.05;
-    const hasDefinedEdges = motionPercentage > 0.1;
-    const hasFingers = hasSignificantSkinTone && hasDefinedEdges;
+    // More realistic thresholds for hand detection
+    const hasSignificantSkinTone = skinPercentage > 0.02; // Lowered from 5% to 2%
+    const hasDefinedEdges = motionPercentage > 0.01; // Lowered from 10% to 1%
+    const hasFingers = hasSignificantSkinTone || (skinPercentage > 0.015 && hasDefinedEdges); // More flexible logic
     
     // Confidence score combines both factors
     const confidence = hasFingers ? Math.min((skinPercentage * 10 + motionPercentage * 5), 1) : 0;
