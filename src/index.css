@@ -51,6 +51,12 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
 
+    /* Beautiful gradients for enhanced backgrounds */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--learning)));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--accent)));
+    --gradient-hero: radial-gradient(ellipse at top, hsl(var(--primary) / 0.1), transparent 50%);
+    --pattern-dots: radial-gradient(circle at 1px 1px, hsl(var(--primary) / 0.15) 1px, transparent 0);
+
     --sidebar-background: 0 0% 98%;
 
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -105,6 +111,13 @@ All colors MUST be HSL.
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 198 89% 65%;
+    
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--learning)));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--accent)));
+    --gradient-hero: radial-gradient(ellipse at top, hsl(var(--primary) / 0.2), transparent 50%);
+    --pattern-dots: radial-gradient(circle at 1px 1px, hsl(var(--primary) / 0.25) 1px, transparent 0);
+    
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -123,5 +136,39 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    background-image: var(--gradient-subtle);
+    min-height: 100vh;
+  }
+
+  /* Enhanced background utilities */
+  .bg-pattern-dots {
+    background-image: var(--pattern-dots);
+    background-size: 20px 20px;
+  }
+
+  .bg-gradient-hero {
+    background-image: var(--gradient-hero);
+  }
+
+  .bg-gradient-primary {
+    background-image: var(--gradient-primary);
+  }
+
+  .bg-enhanced {
+    background: var(--gradient-subtle);
+    position: relative;
+  }
+
+  .bg-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: var(--pattern-dots);
+    background-size: 20px 20px;
+    opacity: 0.4;
+    pointer-events: none;
   }
 }
