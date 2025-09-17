@@ -49,22 +49,16 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      // Call our edge function for authentication
-      const response = await fetch('/api/auth-login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
+      // Call our edge function for authentication using Supabase client
+      const { data: result, error: functionError } = await supabase.functions.invoke('auth-login', {
+        body: { username, password },
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Login failed');
+      if (functionError) {
+        throw new Error(functionError.message || 'Login failed');
       }
 
-      if (result.success) {
+      if (result && result.success) {
         const authConfig: AuthConfig = {
           isAuthenticated: true,
           user: {
@@ -78,7 +72,7 @@ export const useAuth = () => {
         setConfig(authConfig);
         return { success: true };
       } else {
-        throw new Error(result.message || 'Wrong username or password');
+        throw new Error(result?.message || 'Wrong username or password');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed. Please try again.';
