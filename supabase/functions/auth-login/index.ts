@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+import { compare } from 'https://deno.land/x/bcrypt@v0.4.1/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -100,8 +101,9 @@ serve(async (req) => {
 
     console.log('User found, checking password...');
     
-    // For now, let's bypass bcrypt and do a simple comparison for testing
-    const isPasswordValid = password === 'password12345';
+    // Use bcrypt to verify the hashed password
+    const isPasswordValid = await compare(password, user.password_hash);
+    console.log('Password verification result:', isPasswordValid);
     
     if (!isPasswordValid) {
       console.log('Password mismatch');
