@@ -163,6 +163,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_credentials: {
+        Row: {
+          api_key: string
+          created_at: string
+          id: string
+          password_hash: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          api_key: string
+          created_at?: string
+          id?: string
+          password_hash: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          api_key?: string
+          created_at?: string
+          id?: string
+          password_hash?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           created_at: string | null
