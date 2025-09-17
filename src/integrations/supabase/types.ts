@@ -225,6 +225,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      authenticate_teacher: {
+        Args: { p_password: string; p_school_name: string; p_username: string }
+        Returns: boolean
+      }
+      hash_password: {
+        Args: { password: string }
+        Returns: string
+      }
       is_admin_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -236,6 +244,10 @@ export type Database = {
           user_id: string
           username: string
         }[]
+      }
+      verify_password: {
+        Args: { hashed_password: string; password: string }
+        Returns: boolean
       }
     }
     Enums: {
