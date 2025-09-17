@@ -86,6 +86,7 @@ export const useAuth = () => {
         };
         
         setConfig(authConfig);
+        setIsLoggingIn(false); // Reset loading state
         return { success: true };
       } else {
         throw new Error(result?.message || 'Wrong username or password');
@@ -93,9 +94,8 @@ export const useAuth = () => {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed. Please try again.';
       setError(errorMessage);
+      setIsLoggingIn(false); // Reset loading state on error
       return { success: false, error: errorMessage };
-    } finally {
-      setIsLoggingIn(false);
     }
   }, []);
 
