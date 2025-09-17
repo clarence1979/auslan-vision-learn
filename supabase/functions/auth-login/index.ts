@@ -12,22 +12,31 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log('Auth-login function called with method:', req.method);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     if (req.method !== 'POST') {
+      console.log('Method not allowed:', req.method);
       return new Response(JSON.stringify({ error: 'Method not allowed' }), {
         status: 405,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const { username, password } = await req.json();
+    console.log('Processing POST request');
+    const requestBody = await req.json();
+    console.log('Request body keys:', Object.keys(requestBody));
+    
+    const { username, password } = requestBody;
 
     if (!username || !password) {
+      console.log('Missing username or password');
       return new Response(JSON.stringify({ 
         success: false, 
         error: 'Username and password are required' 
@@ -37,9 +46,11 @@ serve(async (req) => {
       });
     }
 
+    console.log('Creating Supabase client...');
     // Create Supabase client with service role key to bypass RLS
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    console.log('Querying user credentials for:', username);
     // Query user credentials
     const { data: user, error: dbError } = await supabase
       .from('user_credentials')
@@ -69,6 +80,7 @@ serve(async (req) => {
       });
     }
 
+    console.log('User found, verifying password...');
     // Verify password
     const isPasswordValid = await compare(password, user.password_hash);
 
@@ -83,6 +95,7 @@ serve(async (req) => {
       });
     }
 
+    console.log('Password valid, retrieving API key...');
     // Get the actual API key from Supabase secrets
     const actualApiKey = Deno.env.get(user.api_key);
     
@@ -97,6 +110,7 @@ serve(async (req) => {
       });
     }
 
+    console.log('Login successful for user:', username);
     // Return success with user data
     return new Response(JSON.stringify({
       success: true,

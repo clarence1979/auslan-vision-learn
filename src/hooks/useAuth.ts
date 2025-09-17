@@ -49,12 +49,18 @@ export const useAuth = () => {
     setError(null);
 
     try {
+      console.log('Attempting login for:', username);
+      
       // Call our edge function for authentication using Supabase client
       const { data: result, error: functionError } = await supabase.functions.invoke('auth-login', {
         body: { username, password },
       });
 
+      console.log('Function result:', result);
+      console.log('Function error:', functionError);
+
       if (functionError) {
+        console.error('Function error:', functionError);
         throw new Error(functionError.message || 'Login failed');
       }
 
