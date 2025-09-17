@@ -45,10 +45,21 @@ serve(async (req) => {
       .from('user_credentials')
       .select('id, username, password_hash, api_key')
       .eq('username', username)
-      .single();
+      .maybeSingle();
 
-    if (dbError || !user) {
-      console.log('User not found:', username, dbError);
+    if (dbError) {
+      console.error('Database error:', dbError);
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'Database error' 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!user) {
+      console.log('User not found:', username);
       return new Response(JSON.stringify({ 
         success: false, 
         message: 'Wrong username or password' 
@@ -72,13 +83,27 @@ serve(async (req) => {
       });
     }
 
+    // Get the actual API key from Supabase secrets
+    const actualApiKey = Deno.env.get(user.api_key);
+    
+    if (!actualApiKey) {
+      console.error('API key not found in secrets:', user.api_key);
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'API key configuration error' 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Return success with user data
     return new Response(JSON.stringify({
       success: true,
       user: {
         id: user.id,
         username: user.username,
-        apiKey: user.api_key
+        apiKey: actualApiKey
       },
       message: 'Login successful'
     }), {
