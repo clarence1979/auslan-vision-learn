@@ -60,7 +60,17 @@ export const useAuth = () => {
       console.log('Function error:', functionError);
 
       if (functionError) {
-        console.error('Function error:', functionError);
+        console.error('Function error details:', {
+          name: functionError.name,
+          message: functionError.message,
+          context: functionError.context
+        });
+        
+        // Try to get more details from the error
+        if (functionError.context && functionError.context.response) {
+          console.error('Response details:', functionError.context.response);
+        }
+        
         throw new Error(functionError.message || 'Login failed');
       }
 
