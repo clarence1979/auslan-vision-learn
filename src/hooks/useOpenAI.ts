@@ -85,13 +85,9 @@ export const useOpenAI = () => {
 
   const analyzeGesture = useCallback(async (
     imageData: string, 
-    expectedGesture: string,
-    apiKey?: string
+    expectedGesture: string
   ): Promise<GestureAnalysisResult> => {
-    const keyToUse = apiKey || config.apiKey;
-    const isKeyValid = keyToUse?.startsWith('sk-') && keyToUse.length > 20;
-    
-    if (!isKeyValid) {
+    if (!config.isValid) {
       throw new Error('Invalid API key. Please configure your OpenAI API key.');
     }
 
@@ -103,7 +99,7 @@ export const useOpenAI = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${keyToUse}`
+          'Authorization': `Bearer ${config.apiKey}`
         },
         body: JSON.stringify({
           model: 'gpt-4o',

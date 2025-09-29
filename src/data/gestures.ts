@@ -38,23 +38,23 @@ export const AUSLAN_GESTURES: Gesture[] = [
   { id: 'y', name: 'Y', category: 'alphabet', description: 'Letter Y in AUSLAN', instructions: 'Thumb and pinky up, other fingers folded', difficulty: 'easy', imageUrl: '/auslan-y.jpg' },
   { id: 'z', name: 'Z', category: 'alphabet', description: 'Letter Z in AUSLAN', instructions: 'Index finger traces Z motion in air', difficulty: 'medium', imageUrl: '/auslan-z.jpg' },
   
-  // Numbers (Updated with user-provided images)
-  { id: '0', name: '0', category: 'numbers', description: 'Number zero in AUSLAN', instructions: 'Make a fist with thumb tucked inside', difficulty: 'easy', imageUrl: '/lovable-uploads/6741ad7c-3583-4ce4-ac19-a77e5fc6602a.png' },
-  { id: '1', name: '1', category: 'numbers', description: 'Number one in AUSLAN', instructions: 'Hold up index finger', difficulty: 'easy', imageUrl: '/lovable-uploads/d3ce1f1e-150b-407c-a12e-49698438c4ce.png' },
+  // Numbers
+  { id: '0', name: '0', category: 'numbers', description: 'Number zero in AUSLAN', instructions: 'Make a fist with thumb tucked inside', difficulty: 'easy', imageUrl: '/auslan-0-new.jpg' },
+  { id: '1', name: '1', category: 'numbers', description: 'Number one in AUSLAN', instructions: 'Hold up index finger', difficulty: 'easy', imageUrl: '/lovable-uploads/21647cf5-26e1-44f3-a918-0310cf59d4c8.png' },
   { id: '2', name: '2', category: 'numbers', description: 'Number two in AUSLAN', instructions: 'Hold up index and middle fingers', difficulty: 'easy', imageUrl: '/lovable-uploads/46e2aa27-1d5c-4359-9b13-e5fceb30827d.png' },
-  { id: '3', name: '3', category: 'numbers', description: 'Number three in AUSLAN', instructions: 'Hold up index, middle, and ring fingers in a clear three gesture', difficulty: 'easy', imageUrl: '/lovable-uploads/68716246-575c-4243-b66e-70b3a2a44f11.png' },
-  { id: '4', name: '4', category: 'numbers', description: 'Number four in AUSLAN', instructions: 'Hold up four fingers clearly, with thumb tucked down', difficulty: 'easy', imageUrl: '/lovable-uploads/5f3c1737-afa9-4d5a-9b8e-b52140e789f0.png' },
-  { id: '5', name: '5', category: 'numbers', description: 'Number five in AUSLAN', instructions: 'Hold up all five fingers', difficulty: 'easy', imageUrl: '/lovable-uploads/85170a27-5004-4f27-b099-6e45dcd5b6d8.png' },
-  { id: '6', name: '6', category: 'numbers', description: 'Number six in AUSLAN', instructions: 'Touch thumb to pinky, other fingers up', difficulty: 'easy', imageUrl: '/lovable-uploads/b7a45057-6666-45bf-bc76-36edbf4929e8.png' },
-  { id: '7', name: '7', category: 'numbers', description: 'Number seven in AUSLAN', instructions: 'Touch thumb to ring finger, other fingers up', difficulty: 'easy', imageUrl: '/lovable-uploads/89a25ec4-5258-46f7-9ee3-5d78e649957c.png' },
-  { id: '8', name: '8', category: 'numbers', description: 'Number eight in AUSLAN', instructions: 'Touch thumb to middle finger, other fingers up', difficulty: 'easy', imageUrl: '/lovable-uploads/85a0e357-9f98-4ac7-b11a-8aff87064b0f.png' },
-  { id: '9', name: '9', category: 'numbers', description: 'Number nine in AUSLAN', instructions: 'Touch thumb to index finger, other fingers up', difficulty: 'easy', imageUrl: '/lovable-uploads/6203ff6c-0af4-45c4-a5b5-bb8693b7e87e.png' },
+  { id: '3', name: '3', category: 'numbers', description: 'Number three in AUSLAN', instructions: 'Hold up index, middle, and ring fingers', difficulty: 'easy', imageUrl: '/auslan-3-new.jpg' },
+  { id: '4', name: '4', category: 'numbers', description: 'Number four in AUSLAN', instructions: 'Hold up four fingers, thumb tucked', difficulty: 'easy', imageUrl: '/auslan-4-new.jpg' },
+  { id: '5', name: '5', category: 'numbers', description: 'Number five in AUSLAN', instructions: 'Hold up all five fingers', difficulty: 'easy', imageUrl: '/auslan-5-new.jpg' },
+  { id: '6', name: '6', category: 'numbers', description: 'Number six in AUSLAN', instructions: 'Touch thumb to pinky, other fingers up', difficulty: 'easy', imageUrl: '/auslan-6-new.jpg' },
+  { id: '7', name: '7', category: 'numbers', description: 'Number seven in AUSLAN', instructions: 'Touch thumb to ring finger, other fingers up', difficulty: 'easy', imageUrl: '/auslan-7-new.jpg' },
+  { id: '8', name: '8', category: 'numbers', description: 'Number eight in AUSLAN', instructions: 'Touch thumb to middle finger, other fingers up', difficulty: 'easy', imageUrl: '/auslan-8-new.jpg' },
+  { id: '9', name: '9', category: 'numbers', description: 'Number nine in AUSLAN', instructions: 'Touch thumb to index finger, other fingers up', difficulty: 'easy', imageUrl: '/auslan-9-new.jpg' },
   
   // Greetings
-  { id: 'hello', name: 'Hello', category: 'greetings', description: 'Hello greeting in AUSLAN', instructions: 'Wave hand from side to side with palm facing forward', difficulty: 'easy', imageUrl: '/lovable-uploads/4fc0ff3a-5b8d-4fcf-ac25-6b7cbefcf813.png' },
-  { id: 'goodbye', name: 'Goodbye', category: 'greetings', description: 'Goodbye gesture in AUSLAN', instructions: 'Wave hand with fingers closing and opening', difficulty: 'easy', imageUrl: '/lovable-uploads/18aad0b2-457f-4797-a7ff-c48c8bc19d68.png' },
-  { id: 'thankyou', name: 'Thank You', category: 'greetings', description: 'Thank you in AUSLAN', instructions: 'Touch fingertips to chin then move hand forward', difficulty: 'medium', imageUrl: '/lovable-uploads/0b2d02b5-2de8-4437-a477-5f482861485b.png' },
-  { id: 'please', name: 'Please', category: 'greetings', description: 'Please in AUSLAN', instructions: 'Rub palm in circular motion on chest', difficulty: 'medium', imageUrl: '/lovable-uploads/525d2199-70c8-435c-ad69-65aabf2272e8.png' },
+  { id: 'hello', name: 'Hello', category: 'greetings', description: 'Hello greeting in AUSLAN', instructions: 'Wave hand from side to side with palm facing forward', difficulty: 'easy' },
+  { id: 'goodbye', name: 'Goodbye', category: 'greetings', description: 'Goodbye gesture in AUSLAN', instructions: 'Wave hand with fingers closing and opening', difficulty: 'easy' },
+  { id: 'thankyou', name: 'Thank You', category: 'greetings', description: 'Thank you in AUSLAN', instructions: 'Touch fingertips to chin then move hand forward', difficulty: 'medium' },
+  { id: 'please', name: 'Please', category: 'greetings', description: 'Please in AUSLAN', instructions: 'Rub palm in circular motion on chest', difficulty: 'medium' },
   
   // Common words
   { id: 'yes', name: 'Yes', category: 'common', description: 'Yes in AUSLAN', instructions: 'Nod fist up and down', difficulty: 'easy' },

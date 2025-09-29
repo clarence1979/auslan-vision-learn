@@ -18,7 +18,6 @@ import {
 import { Camera } from '@/components/Camera';
 import { GestureLibrary } from '@/components/GestureLibrary';
 import { SettingsModal } from '@/components/SettingsModal';
-import { useAuth } from '@/hooks/useAuth';
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { useProgress } from '@/hooks/useProgress';
 import { useFingerDetection } from '@/hooks/useFingerDetection';
@@ -29,13 +28,13 @@ const Index = () => {
   console.log('Index component rendering');
   
   const { toast } = useToast();
-  const { config: authConfig, logout } = useAuth();
-  const { analyzeGesture, isAnalyzing, error } = useOpenAI();
+  const { config, analyzeGesture, isAnalyzing, error } = useOpenAI();
   const { recordAttempt, getSuccessRate, getMasteredCount } = useProgress();
   const { detectFingers, isAnalyzing: isDetectingFingers, initializeHands } = useFingerDetection();
   
   const [activeMode, setActiveMode] = useState<'learn' | 'practice'>('learn');
   const [selectedGesture, setSelectedGesture] = useState<Gesture | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
   const [lastResult, setLastResult] = useState<any>(null);
 
   console.log('All hooks initialized successfully');
@@ -54,14 +53,14 @@ const Index = () => {
       return;
     }
 
-    if (!authConfig.isAuthenticated || !authConfig.apiKey) {
-      console.log('Not authenticated or no API key:', authConfig);
+    if (!config.isValid) {
+      console.log('Config invalid:', config);
       toast({
-        title: "Authentication required",
-        description: "Please sign in to use gesture recognition.",
+        title: "API key required",
+        description: "Please configure your OpenAI API key in settings.",
         variant: "destructive"
       });
-      logout();
+      setShowSettings(true);
       return;
     }
 
@@ -82,8 +81,10 @@ const Index = () => {
         return;
       }
 
+      console.log('Fingers detected! Starting OpenAI analysis for gesture:', selectedGesture.name);
+      
       // Only proceed with OpenAI analysis if fingers are detected
-      const result = await analyzeGesture(imageData, selectedGesture.name, authConfig.apiKey);
+      const result = await analyzeGesture(imageData, selectedGesture.name);
       console.log('Analysis result:', result);
       setLastResult(result);
       
@@ -194,38 +195,47 @@ const Index = () => {
                 />
               </form>
               
-              {/* User Info and Logout */}
-              <div className="flex items-center gap-4 text-sm">
-                <div className="hidden md:flex items-center gap-2">
-                  <span className="text-muted-foreground">Welcome,</span>
-                  <span className="font-medium">{authConfig.user?.username}</span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={logout}
-                  className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
-                >
-                  Sign Out
-                </Button>
-              </div>
+              {/* API Key Status Indicator */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSettings(true)}
+                className={`w-10 h-10 rounded-full p-0 ${
+                  config.isValid 
+                    ? 'bg-green-500 hover:bg-green-600 border-green-500' 
+                    : 'bg-red-500 hover:bg-red-600 border-red-500'
+                }`}
+                title={config.isValid ? 'API Key configured' : 'API Key required'}
+              >
+                <div className="w-2 h-2 bg-white rounded-full" />
+              </Button>
               
-              {/* API Key Status - now shows authenticated status */}
-              <div className="flex items-center gap-2">
-                <div 
-                  className="w-10 h-10 rounded-full flex items-center justify-center bg-green-500 border-green-500"
-                  title="Authenticated and API key configured"
-                >
-                  <div className="w-2 h-2 bg-white rounded-full" />
-                </div>
-              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSettings(true)}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Settings and Privacy
+              </Button>
             </div>
           </div>
         </div>
       </header>
 
       <div className="relative container mx-auto px-4 py-6 bg-pattern-grid">
-        {/* No API key warning removed - handled by authentication */}
+        {/* API Key Warning */}
+        {!config.isValid && (
+          <Alert className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>OpenAI API key required for gesture recognition.</span>
+              <Button variant="outline" size="sm" onClick={() => setShowSettings(true)}>
+                Configure
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Tabs value={activeMode} onValueChange={(v) => setActiveMode(v as 'learn' | 'practice')}>
           <TabsList className="grid w-full grid-cols-2 mb-6">
@@ -361,15 +371,15 @@ const Index = () => {
                     </Card>
                   )}
 
-                   {/* Loading state */}
-                   {isAnalyzing && (
+                  {/* Loading state */}
+                  {(isAnalyzing || isDetectingFingers) && (
                     <Card>
                       <CardContent className="flex items-center justify-center py-8">
                         <div className="text-center">
                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                           <p className="text-sm text-muted-foreground">
-                             {"Analyzing gesture..."}
-                           </p>
+                          <p className="text-sm text-muted-foreground">
+                            {isDetectingFingers ? "Detecting hands..." : "Analyzing gesture..."}
+                          </p>
                         </div>
                       </CardContent>
                     </Card>
@@ -395,6 +405,12 @@ const Index = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        open={showSettings}
+        onOpenChange={setShowSettings}
+      />
     </div>
   );
 };
