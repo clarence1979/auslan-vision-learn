@@ -16,12 +16,11 @@ export interface GestureAnalysisResult {
 export const useOpenAI = () => {
   const [config, setConfig] = useState<OpenAIConfig>(() => {
     try {
-      const saved = localStorage.getItem('auslan-openai-config');
+      const saved = localStorage.getItem('openai_api_key');
       if (saved) {
-        const parsed = JSON.parse(saved);
         const result = {
-          apiKey: parsed.apiKey || '',
-          isValid: parsed.apiKey?.startsWith('sk-') && parsed.apiKey?.length > 20
+          apiKey: saved,
+          isValid: saved.startsWith('sk-') && saved.length > 20
         };
         return result;
       }
@@ -34,34 +33,43 @@ export const useOpenAI = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Listen for localStorage changes and update config
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlApiKey = urlParams.get('apiKey');
+
+    if (urlApiKey) {
+      localStorage.setItem('openai_api_key', urlApiKey);
+      setConfig({
+        apiKey: urlApiKey,
+        isValid: urlApiKey.startsWith('sk-') && urlApiKey.length > 20
+      });
+
+      const url = new URL(window.location.href);
+      url.searchParams.delete('apiKey');
+      window.history.replaceState({}, document.title, url.toString());
+    }
+  }, []);
+
   useEffect(() => {
     const handleStorageChange = () => {
       try {
-        const saved = localStorage.getItem('auslan-openai-config');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          const newConfig = {
-            apiKey: parsed.apiKey || '',
-            isValid: parsed.apiKey?.startsWith('sk-') && parsed.apiKey?.length > 20
-          };
-          setConfig(prevConfig => {
-            // Only update if the config has actually changed
-            if (prevConfig.apiKey !== newConfig.apiKey || prevConfig.isValid !== newConfig.isValid) {
-              return newConfig;
-            }
-            return prevConfig;
-          });
-        }
+        const saved = localStorage.getItem('openai_api_key');
+        const newConfig = {
+          apiKey: saved || '',
+          isValid: saved ? saved.startsWith('sk-') && saved.length > 20 : false
+        };
+        setConfig(prevConfig => {
+          if (prevConfig.apiKey !== newConfig.apiKey || prevConfig.isValid !== newConfig.isValid) {
+            return newConfig;
+          }
+          return prevConfig;
+        });
       } catch (error) {
         console.error('Error handling storage change:', error);
       }
     };
 
-    // Listen for storage events (from other tabs/components)
     window.addEventListener('storage', handleStorageChange);
-    
-    // Also listen for custom events (for same-tab updates)
     window.addEventListener('auslan-config-updated', handleStorageChange);
 
     return () => {
@@ -70,10 +78,12 @@ export const useOpenAI = () => {
     };
   }, []);
 
-  // Persist config to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('auslan-openai-config', JSON.stringify(config));
-    // Dispatch custom event to notify other components
+    if (config.apiKey) {
+      localStorage.setItem('openai_api_key', config.apiKey);
+    } else {
+      localStorage.removeItem('openai_api_key');
+    }
     window.dispatchEvent(new CustomEvent('auslan-config-updated'));
   }, [config]);
 
