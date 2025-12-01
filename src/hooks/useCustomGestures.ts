@@ -32,11 +32,6 @@ export const useCustomGestures = () => {
     try {
       const userId = getUserId();
 
-      await supabase.rpc('set_config', {
-        parameter: 'app.user_id',
-        value: userId
-      }).catch(() => {});
-
       const { data, error: fetchError } = await supabase
         .from('custom_gestures')
         .select('*')
@@ -64,11 +59,6 @@ export const useCustomGestures = () => {
 
     try {
       const userId = getUserId();
-
-      await supabase.rpc('set_config', {
-        parameter: 'app.user_id',
-        value: userId
-      }).catch(() => {});
 
       const { error: insertError } = await supabase
         .from('custom_gestures')
@@ -99,11 +89,6 @@ export const useCustomGestures = () => {
 
     try {
       const userId = getUserId();
-
-      await supabase.rpc('set_config', {
-        parameter: 'app.user_id',
-        value: userId
-      }).catch(() => {});
 
       const { error: deleteError } = await supabase
         .from('custom_gestures')
