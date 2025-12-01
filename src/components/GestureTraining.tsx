@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
@@ -13,7 +12,6 @@ import {
   Camera as CameraIcon,
   Save,
   Trash2,
-  Plus,
   AlertCircle,
   BookOpen,
   Sparkles
@@ -23,25 +21,24 @@ export const GestureTraining: React.FC = () => {
   const { toast } = useToast();
   const { gestures, isLoading, saveGesture, deleteGesture } = useCustomGestures();
 
-  const [isCapturing, setIsCapturing] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(true);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [gestureName, setGestureName] = useState('');
-  const [description, setDescription] = useState('');
 
   const handleCapture = (imageData: string) => {
     setCapturedImage(imageData);
     setIsCapturing(false);
     toast({
       title: "Gesture captured!",
-      description: "Now give it a name and save it."
+      description: "Now tell the computer what this gesture means."
     });
   };
 
   const handleSave = async () => {
     if (!gestureName.trim()) {
       toast({
-        title: "Name required",
-        description: "Please enter a name for your gesture.",
+        title: "Word required",
+        description: "Please tell the computer what this gesture means.",
         variant: "destructive"
       });
       return;
@@ -49,14 +46,14 @@ export const GestureTraining: React.FC = () => {
 
     if (!capturedImage) {
       toast({
-        title: "No image",
+        title: "No gesture",
         description: "Please capture a gesture first.",
         variant: "destructive"
       });
       return;
     }
 
-    const success = await saveGesture(gestureName, capturedImage, description);
+    const success = await saveGesture(gestureName, capturedImage);
 
     if (success) {
       toast({
@@ -66,7 +63,7 @@ export const GestureTraining: React.FC = () => {
 
       setCapturedImage(null);
       setGestureName('');
-      setDescription('');
+      setIsCapturing(true);
     } else {
       toast({
         title: "Save failed",
@@ -95,11 +92,10 @@ export const GestureTraining: React.FC = () => {
     }
   };
 
-  const handleReset = () => {
+  const handleRetake = () => {
     setCapturedImage(null);
     setGestureName('');
-    setDescription('');
-    setIsCapturing(false);
+    setIsCapturing(true);
   };
 
   return (
@@ -117,80 +113,61 @@ export const GestureTraining: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5" />
-                Train New Gesture
+                <CameraIcon className="h-5 w-5" />
+                Record Gesture
               </CardTitle>
               <CardDescription>
-                Capture a hand gesture and teach the AI to recognize it
+                Step 1: Make a gesture → Step 2: Tell the computer what it means
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {!isCapturing && !capturedImage && (
-                <Button
-                  onClick={() => setIsCapturing(true)}
-                  className="w-full"
-                  size="lg"
-                >
-                  <CameraIcon className="h-5 w-5 mr-2" />
-                  Start Capturing
-                </Button>
-              )}
-
-              {isCapturing && (
+              {isCapturing && !capturedImage && (
                 <div className="space-y-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-900">
+                    <strong>Step 1:</strong> Make your gesture in front of the camera and click "Capture"
+                  </div>
                   <Camera
                     onCapture={handleCapture}
                     autoCapture={false}
                   />
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsCapturing(false)}
-                    className="w-full"
-                  >
-                    Cancel
-                  </Button>
                 </div>
               )}
 
               {capturedImage && !isCapturing && (
                 <div className="space-y-4">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-900">
+                    <strong>Step 2:</strong> Now tell the computer what this gesture means
+                  </div>
+
                   <div className="relative">
                     <img
                       src={capturedImage}
                       alt="Captured gesture"
-                      className="w-full rounded-lg border-2 border-primary"
+                      className="w-full rounded-lg border-2 border-green-500"
                     />
                     <Badge className="absolute top-2 right-2 bg-green-500">
                       Captured
                     </Badge>
                   </div>
 
-                  <div className="space-y-3">
-                    <div>
-                      <Label htmlFor="gesture-name">Gesture Name*</Label>
-                      <Input
-                        id="gesture-name"
-                        placeholder="e.g., hello, water, help"
-                        value={gestureName}
-                        onChange={(e) => setGestureName(e.target.value)}
-                        maxLength={50}
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        What word or concept does this gesture represent?
-                      </p>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="description">Description (Optional)</Label>
-                      <Textarea
-                        id="description"
-                        placeholder="Add notes about how to perform this gesture..."
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        rows={3}
-                        maxLength={200}
-                      />
-                    </div>
+                  <div>
+                    <Label htmlFor="gesture-name" className="text-base">
+                      What does this gesture mean?
+                    </Label>
+                    <Input
+                      id="gesture-name"
+                      placeholder="Type the word (e.g., hello, water, help, I, want)"
+                      value={gestureName}
+                      onChange={(e) => setGestureName(e.target.value)}
+                      maxLength={50}
+                      className="text-lg mt-2"
+                      autoFocus
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && gestureName.trim()) {
+                          handleSave();
+                        }
+                      }}
+                    />
                   </div>
 
                   <div className="flex gap-2">
@@ -198,16 +175,17 @@ export const GestureTraining: React.FC = () => {
                       onClick={handleSave}
                       disabled={isLoading || !gestureName.trim()}
                       className="flex-1"
+                      size="lg"
                     >
                       <Save className="h-4 w-4 mr-2" />
-                      Save Gesture
+                      Save & Train Another
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={handleReset}
-                      className="flex-1"
+                      onClick={handleRetake}
+                      size="lg"
                     >
-                      Reset
+                      Retake
                     </Button>
                   </div>
                 </div>
@@ -238,39 +216,27 @@ export const GestureTraining: React.FC = () => {
                   <p className="text-sm">Start by capturing your first gesture!</p>
                 </div>
               ) : (
-                <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                  {gestures.map((gesture) => (
-                    <Card key={gesture.id} className="overflow-hidden">
-                      <div className="flex gap-3 p-3">
-                        <img
-                          src={gesture.image_data}
-                          alt={gesture.gesture_name}
-                          className="w-20 h-20 object-cover rounded border"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-sm truncate">
-                            {gesture.gesture_name}
-                          </h4>
-                          {gesture.description && (
-                            <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                              {gesture.description}
-                            </p>
-                          )}
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(gesture.created_at).toLocaleDateString()}
-                          </p>
-                        </div>
+                <div className="space-y-2 max-h-[600px] overflow-y-auto">
+                  <div className="flex flex-wrap gap-2">
+                    {gestures.map((gesture) => (
+                      <div key={gesture.id} className="relative group">
+                        <Badge
+                          variant="outline"
+                          className="text-sm py-2 px-3 pr-8 cursor-default hover:bg-accent"
+                        >
+                          {gesture.gesture_name}
+                        </Badge>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDelete(gesture.id, gesture.gesture_name)}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          className="absolute right-0 top-0 h-full px-2 text-destructive hover:text-destructive hover:bg-transparent opacity-0 group-hover:opacity-100 transition-opacity"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
-                    </Card>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
             </CardContent>
