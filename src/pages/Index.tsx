@@ -5,19 +5,23 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Settings, 
-  BookOpen, 
-  Play, 
-  Trophy, 
+import {
+  Settings,
+  BookOpen,
+  Play,
+  Trophy,
   Camera as CameraIcon,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  Sparkles,
+  MessageSquare
 } from 'lucide-react';
 
 import { Camera } from '@/components/Camera';
 import { GestureLibrary } from '@/components/GestureLibrary';
 import { SettingsModal } from '@/components/SettingsModal';
+import { GestureTraining } from '@/components/GestureTraining';
+import { SentenceBuilder } from '@/components/SentenceBuilder';
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { useProgress } from '@/hooks/useProgress';
 import { useFingerDetection } from '@/hooks/useFingerDetection';
@@ -26,13 +30,13 @@ import auslanLogo from '@/assets/auslan-logo.png';
 
 const Index = () => {
   console.log('Index component rendering');
-  
+
   const { toast } = useToast();
   const { config, analyzeGesture, isAnalyzing, error } = useOpenAI();
   const { recordAttempt, getSuccessRate, getMasteredCount } = useProgress();
   const { detectFingers, isAnalyzing: isDetectingFingers, initializeHands } = useFingerDetection();
-  
-  const [activeMode, setActiveMode] = useState<'learn' | 'practice'>('learn');
+
+  const [activeMode, setActiveMode] = useState<'learn' | 'practice' | 'train' | 'communicate'>('learn');
   const [selectedGesture, setSelectedGesture] = useState<Gesture | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [lastResult, setLastResult] = useState<any>(null);
@@ -237,15 +241,23 @@ const Index = () => {
           </Alert>
         )}
 
-        <Tabs value={activeMode} onValueChange={(v) => setActiveMode(v as 'learn' | 'practice')}>
-          <TabsList className="grid w-full grid-cols-2 mb-6">
+        <Tabs value={activeMode} onValueChange={(v) => setActiveMode(v as 'learn' | 'practice' | 'train' | 'communicate')}>
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="learn" className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
-              Learn Gestures
+              Common Words
             </TabsTrigger>
             <TabsTrigger value="practice" className="flex items-center gap-2">
               <Play className="h-4 w-4" />
               Practice Mode
+            </TabsTrigger>
+            <TabsTrigger value="train" className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              Train Your Own
+            </TabsTrigger>
+            <TabsTrigger value="communicate" className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Communicate
             </TabsTrigger>
           </TabsList>
 
@@ -403,10 +415,17 @@ const Index = () => {
               </Card>
             )}
           </TabsContent>
+
+          <TabsContent value="train">
+            <GestureTraining />
+          </TabsContent>
+
+          <TabsContent value="communicate">
+            <SentenceBuilder />
+          </TabsContent>
         </Tabs>
       </div>
 
-      {/* Settings Modal */}
       <SettingsModal
         open={showSettings}
         onOpenChange={setShowSettings}
