@@ -27,6 +27,7 @@ import { useProgress } from '@/hooks/useProgress';
 import { useFingerDetection } from '@/hooks/useFingerDetection';
 import { Gesture } from '@/data/gestures';
 import auslanLogo from '@/assets/auslan-logo.png';
+import digivecLogo from '@/assets/digivec_logo.png';
 
 const Index = () => {
   console.log('Index component rendering');
@@ -149,24 +150,24 @@ const Index = () => {
                 </p>
               </div>
               
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>Proudly made by:</span>
-                <a 
-                  href="https://clarence.guru" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="hover:opacity-80 transition-opacity"
-                >
-                  <img 
-                    src="/lovable-uploads/a349d04b-5577-4c13-bf4e-5316c1e5782e.png" 
-                    alt="Clarence's Solutions" 
-                    className="h-8 w-auto"
-                  />
-                </a>
-              </div>
             </div>
-            
-            <div className="flex items-center gap-4">
+
+            <div className="flex items-center gap-6">
+              <a
+                href="https://digitalvector.com.au"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:opacity-80 transition-opacity"
+                title="Powered by Digital Vector"
+              >
+                <img
+                  src={digivecLogo}
+                  alt="Digital Vector"
+                  className="h-16 w-auto"
+                />
+              </a>
+
+              <div className="flex items-center gap-4">
               {/* Stats */}
               <div className="hidden md:flex items-center gap-4 text-sm">
                 <div className="flex items-center gap-1">
@@ -222,6 +223,7 @@ const Index = () => {
                 <Settings className="h-4 w-4 mr-2" />
                 Settings and Privacy
               </Button>
+              </div>
             </div>
           </div>
         </div>
