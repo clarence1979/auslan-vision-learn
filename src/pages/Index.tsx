@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,14 +14,17 @@ import {
   AlertCircle,
   CheckCircle,
   Sparkles,
-  MessageSquare
+  MessageSquare,
+  LogOut,
+  Loader2
 } from 'lucide-react';
 
 import { Camera } from '@/components/Camera';
 import { GestureLibrary } from '@/components/GestureLibrary';
-import { SettingsModal } from '@/components/SettingsModal';
 import { GestureTraining } from '@/components/GestureTraining';
 import { SentenceBuilder } from '@/components/SentenceBuilder';
+import { LoginScreen } from '@/components/LoginScreen';
+import { useAuth } from '@/contexts/AuthContext';
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { useProgress } from '@/hooks/useProgress';
 import { useFingerDetection } from '@/hooks/useFingerDetection';
@@ -32,17 +35,38 @@ import digivecLogo from '@/assets/digivec_logo.png';
 const Index = () => {
   console.log('Index component rendering');
 
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const { toast } = useToast();
-  const { config, analyzeGesture, isAnalyzing, error } = useOpenAI();
+  const { config, analyzeGesture, isAnalyzing, error, setApiKey } = useOpenAI();
   const { recordAttempt, getSuccessRate, getMasteredCount } = useProgress();
   const { detectFingers, isAnalyzing: isDetectingFingers, initializeHands } = useFingerDetection();
 
   const [activeMode, setActiveMode] = useState<'learn' | 'practice' | 'train' | 'communicate'>('learn');
   const [selectedGesture, setSelectedGesture] = useState<Gesture | null>(null);
-  const [showSettings, setShowSettings] = useState(false);
   const [lastResult, setLastResult] = useState<any>(null);
 
   console.log('All hooks initialized successfully');
+
+  useEffect(() => {
+    if (user?.openaiKey) {
+      setApiKey(user.openaiKey);
+    }
+  }, [user, setApiKey]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-enhanced flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
 
   const handleGestureCapture = async (imageData: string) => {
     console.log('=== GESTURE ANALYSIS START ===');
@@ -62,10 +86,9 @@ const Index = () => {
       console.log('Config invalid:', config);
       toast({
         title: "API key required",
-        description: "Please configure your OpenAI API key in settings.",
+        description: "OpenAI API key is not configured. Please contact your administrator.",
         variant: "destructive"
       });
-      setShowSettings(true);
       return;
     }
 
@@ -200,28 +223,34 @@ const Index = () => {
                 />
               </form>
               
-              {/* API Key Status Indicator */}
+              {/* Authentication Status Indicator */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`w-10 h-10 rounded-full p-0 ${
+                    config.isValid
+                      ? 'bg-green-500 hover:bg-green-600'
+                      : 'bg-yellow-500 hover:bg-yellow-600'
+                  }`}
+                  title={config.isValid ? 'Authenticated - API Key configured' : 'Authenticated - API Key missing'}
+                  disabled
+                >
+                  <Settings className="h-5 w-5 text-white" />
+                </Button>
+
+                <span className="text-sm text-muted-foreground hidden md:inline">
+                  {user?.username}
+                </span>
+              </div>
+
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setShowSettings(true)}
-                className={`w-10 h-10 rounded-full p-0 ${
-                  config.isValid 
-                    ? 'bg-green-500 hover:bg-green-600 border-green-500' 
-                    : 'bg-red-500 hover:bg-red-600 border-red-500'
-                }`}
-                title={config.isValid ? 'API Key configured' : 'API Key required'}
+                onClick={logout}
               >
-                <div className="w-2 h-2 bg-white rounded-full" />
-              </Button>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowSettings(true)}
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Settings and Privacy
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
               </Button>
               </div>
             </div>
@@ -234,11 +263,8 @@ const Index = () => {
         {!config.isValid && (
           <Alert className="mb-6">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
-              <span>OpenAI API key required for gesture recognition.</span>
-              <Button variant="outline" size="sm" onClick={() => setShowSettings(true)}>
-                Configure
-              </Button>
+            <AlertDescription>
+              <span>OpenAI API key is not configured. Some features may be limited. Please contact your administrator.</span>
             </AlertDescription>
           </Alert>
         )}
@@ -427,11 +453,6 @@ const Index = () => {
           </TabsContent>
         </Tabs>
       </div>
-
-      <SettingsModal
-        open={showSettings}
-        onOpenChange={setShowSettings}
-      />
     </div>
   );
 };
