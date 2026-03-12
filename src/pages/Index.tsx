@@ -5,17 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import {
-  Settings,
-  BookOpen,
-  Play,
-  Trophy,
-  Camera as CameraIcon,
-  AlertCircle,
-  CheckCircle,
-  Sparkles,
-  MessageSquare,
-} from 'lucide-react';
+import { Settings, BookOpen, Play, Trophy, Camera as CameraIcon, CircleAlert as AlertCircle, CircleCheck as CheckCircle, Sparkles, MessageSquare } from 'lucide-react';
 
 import { Camera } from '@/components/Camera';
 import { GestureLibrary } from '@/components/GestureLibrary';
