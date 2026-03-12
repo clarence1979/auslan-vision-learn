@@ -15,16 +15,12 @@ import {
   CheckCircle,
   Sparkles,
   MessageSquare,
-  LogOut,
-  Loader2
 } from 'lucide-react';
 
 import { Camera } from '@/components/Camera';
 import { GestureLibrary } from '@/components/GestureLibrary';
 import { GestureTraining } from '@/components/GestureTraining';
 import { SentenceBuilder } from '@/components/SentenceBuilder';
-import { LoginScreen } from '@/components/LoginScreen';
-import { useAuth } from '@/contexts/AuthContext';
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { useProgress } from '@/hooks/useProgress';
 import { useFingerDetection } from '@/hooks/useFingerDetection';
@@ -35,9 +31,8 @@ import digivecLogo from '@/assets/digivec_logo.png';
 const Index = () => {
   console.log('Index component rendering');
 
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const { toast } = useToast();
-  const { config, analyzeGesture, isAnalyzing, error, setApiKey } = useOpenAI();
+  const { config, analyzeGesture, isAnalyzing, error } = useOpenAI();
   const { recordAttempt, getSuccessRate, getMasteredCount } = useProgress();
   const { detectFingers, isAnalyzing: isDetectingFingers, initializeHands } = useFingerDetection();
 
@@ -46,27 +41,6 @@ const Index = () => {
   const [lastResult, setLastResult] = useState<any>(null);
 
   console.log('All hooks initialized successfully');
-
-  useEffect(() => {
-    if (user?.openaiKey) {
-      setApiKey(user.openaiKey);
-    }
-  }, [user, setApiKey]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-enhanced flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <LoginScreen />;
-  }
 
   const handleGestureCapture = async (imageData: string) => {
     console.log('=== GESTURE ANALYSIS START ===');
@@ -201,57 +175,27 @@ const Index = () => {
                   <span>Success rate: {getSuccessRate()}%</span>
                 </div>
               </div>
-              
+
               {/* PayPal Donation Button */}
               <form action="https://www.paypal.com/donate" method="post" target="_top" className="flex items-center">
                 <input type="hidden" name="hosted_button_id" value="PSXE6LDM3ZJDC" />
-                <input 
-                  type="image" 
-                  src="https://www.paypalobjects.com/en_AU/i/btn/btn_donateCC_LG.gif" 
-                  style={{border: 0}} 
-                  name="submit" 
-                  title="PayPal - The safer, easier way to pay online!" 
-                  alt="Donate with PayPal button" 
+                <input
+                  type="image"
+                  src="https://www.paypalobjects.com/en_AU/i/btn/btn_donateCC_LG.gif"
+                  style={{border: 0}}
+                  name="submit"
+                  title="PayPal - The safer, easier way to pay online!"
+                  alt="Donate with PayPal button"
                   className="h-10 hover:opacity-80 transition-opacity"
                 />
-                <img 
-                  alt="" 
-                  style={{border: 0}} 
-                  src="https://www.paypal.com/en_AU/i/scr/pixel.gif" 
-                  width={1} 
-                  height={1} 
+                <img
+                  alt=""
+                  style={{border: 0}}
+                  src="https://www.paypal.com/en_AU/i/scr/pixel.gif"
+                  width={1}
+                  height={1}
                 />
               </form>
-              
-              {/* Authentication Status Indicator */}
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`w-10 h-10 rounded-full p-0 ${
-                    config.isValid
-                      ? 'bg-green-500 hover:bg-green-600'
-                      : 'bg-yellow-500 hover:bg-yellow-600'
-                  }`}
-                  title={config.isValid ? 'Authenticated - API Key configured' : 'Authenticated - API Key missing'}
-                  disabled
-                >
-                  <Settings className="h-5 w-5 text-white" />
-                </Button>
-
-                <span className="text-sm text-muted-foreground hidden md:inline">
-                  {user?.username}
-                </span>
-              </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={logout}
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
               </div>
             </div>
           </div>
@@ -264,7 +208,7 @@ const Index = () => {
           <Alert className="mb-6">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              <span>OpenAI API key is not configured. Some features may be limited. Please contact your administrator.</span>
+              <span>OpenAI API key is not configured. Gesture recognition features will be limited.</span>
             </AlertDescription>
           </Alert>
         )}
