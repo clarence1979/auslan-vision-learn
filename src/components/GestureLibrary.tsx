@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { Trophy, Play, BookOpen } from 'lucide-react';
+import { Trophy, Play } from 'lucide-react';
 import { AUSLAN_GESTURES, GESTURE_CATEGORIES, Gesture } from '@/data/gestures';
 import { useProgress } from '@/hooks/useProgress';
 
@@ -148,17 +148,6 @@ export const GestureLibrary: React.FC<GestureLibraryProps> = ({
                         </Badge>
                         
                         <div className="flex gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 w-8 p-0"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // TODO: Open tutorial mode
-                            }}
-                          >
-                            <BookOpen className="h-3 w-3" />
-                          </Button>
                           <Button
                             size="sm"
                             variant="ghost"
