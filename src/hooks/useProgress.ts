@@ -61,12 +61,13 @@ export const useProgress = () => {
         mastered: false
       };
 
+      const newSuccesses = success ? gestureProgress.successes + 1 : gestureProgress.successes;
       const newGestureProgress = {
         ...gestureProgress,
         attempts: gestureProgress.attempts + 1,
-        successes: success ? gestureProgress.successes + 1 : gestureProgress.successes,
+        successes: newSuccesses,
         lastPracticed: new Date().toISOString(),
-        mastered: success && gestureProgress.successes >= 4 // Master after 5 successes
+        mastered: gestureProgress.mastered || newSuccesses >= 5
       };
 
       return {
