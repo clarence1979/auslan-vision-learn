@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,14 +8,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Key, Settings, Trash2, AlertCircle, CheckCircle, Shield } from 'lucide-react';
-import { useOpenAI } from '@/hooks/useOpenAI';
+import { Settings, Trash2, CircleAlert as AlertCircle, Shield } from 'lucide-react';
 import { useProgress } from '@/hooks/useProgress';
 
 interface SettingsModalProps {
@@ -27,46 +24,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   open,
   onOpenChange
 }) => {
-  const { config, setApiKey, testApiKey } = useOpenAI();
   const { progress, resetProgress, getSuccessRate, getMasteredCount } = useProgress();
-  
-  const [tempApiKey, setTempApiKey] = useState('');
-  const [isValidating, setIsValidating] = useState(false);
-  const [validationResult, setValidationResult] = useState<boolean | null>(null);
-
-  // Initialize tempApiKey with current config when modal opens
-  React.useEffect(() => {
-    if (open) {
-      setTempApiKey(config.apiKey);
-      setValidationResult(null);
-    }
-  }, [open, config.apiKey]);
-
-  const handleSaveApiKey = async () => {
-    if (!tempApiKey.trim()) {
-      setValidationResult(false);
-      return;
-    }
-
-    setIsValidating(true);
-    setValidationResult(null);
-
-    try {
-      const isValid = await testApiKey(tempApiKey);
-      setValidationResult(isValid);
-      
-      if (isValid) {
-        setApiKey(tempApiKey);
-        setTimeout(() => {
-          onOpenChange(false);
-        }, 1000);
-      }
-    } catch {
-      setValidationResult(false);
-    } finally {
-      setIsValidating(false);
-    }
-  };
 
   const handleResetProgress = () => {
     if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
@@ -87,98 +45,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="api" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="api" className="flex items-center gap-2">
-              <Key className="h-4 w-4" />
-              API Key
-            </TabsTrigger>
+        <Tabs defaultValue="progress" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="progress">Progress</TabsTrigger>
             <TabsTrigger value="privacy" className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
               Privacy
             </TabsTrigger>
           </TabsList>
-
-          <TabsContent value="api" className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="apikey">OpenAI API Key</Label>
-              <Input
-                id="apikey"
-                type="password"
-                placeholder="sk-..."
-                value={tempApiKey}
-                onChange={(e) => setTempApiKey(e.target.value)}
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground">
-                Required for gesture recognition. Get your API key from{' '}
-                <a
-                  href="https://platform.openai.com/api-keys"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  OpenAI Platform
-                </a>
-              </p>
-            </div>
-
-            {/* API Key Status */}
-            <div className="space-y-2">
-              <Label>Status</Label>
-              <div className="flex items-center gap-2">
-                {config.isValid ? (
-                  <Badge variant="default" className="bg-success text-success-foreground">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Valid
-                  </Badge>
-                ) : (
-                  <Badge variant="destructive">
-                    <AlertCircle className="h-3 w-3 mr-1" />
-                    Not configured
-                  </Badge>
-                )}
-              </div>
-            </div>
-
-            {/* Validation feedback */}
-            {validationResult !== null && (
-              <Alert variant={validationResult ? "default" : "destructive"}>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  {validationResult
-                    ? "API key is valid and ready to use!"
-                    : "Invalid API key. Please check and try again."
-                  }
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <div className="flex gap-2">
-              <Button
-                onClick={handleSaveApiKey}
-                disabled={isValidating || !tempApiKey.trim()}
-                className="flex-1"
-              >
-                {isValidating ? "Validating..." : "Save API Key"}
-              </Button>
-              
-              {config.apiKey && (
-                <Button
-                  onClick={() => {
-                    setApiKey('');
-                    setTempApiKey('');
-                    setValidationResult(null);
-                  }}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  Clear API Key
-                </Button>
-              )}
-            </div>
-          </TabsContent>
 
           <TabsContent value="progress" className="space-y-4">
             <div>
@@ -232,10 +106,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     AUSLAN Vision Learn is designed with privacy-by-design principles suitable for educational environments:
                   </p>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Camera images are processed locally and not transmitted or stored</li>
-                    <li>OpenAI API key is stored locally in your browser only</li>
+                    <li>Camera images are processed securely and not stored</li>
+                    <li>Gesture recognition is powered by a secure backend service</li>
                     <li>Learning progress data remains on your device</li>
-                    <li>No personal information is collected or transmitted to external servers</li>
+                    <li>No personal information is collected or transmitted</li>
                   </ul>
                 </div>
 
@@ -252,10 +126,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div>
                   <h4 className="font-semibold mb-2">Technical Safeguards</h4>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Client-side processing ensures data sovereignty</li>
+                    <li>API keys are stored securely on the server, never exposed to the browser</li>
                     <li>Secure HTTPS communication protocols</li>
                     <li>No cookies or tracking mechanisms employed</li>
-                    <li>Local storage encryption for API credentials</li>
                   </ul>
                 </div>
 
@@ -263,7 +136,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <h4 className="font-semibold mb-2">Educational Institution Benefits</h4>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                     <li>Minimal data collection reduces privacy risk assessment requirements</li>
-                    <li>No external data processing agreements needed beyond OpenAI API terms</li>
                     <li>Supports accessibility requirements for diverse learning needs</li>
                     <li>Can be deployed on institutional networks without data sovereignty concerns</li>
                   </ul>
@@ -282,8 +154,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <Alert>
                   <Shield className="h-4 w-4" />
                   <AlertDescription>
-                    <strong>For IT Administrators:</strong> This application requires only an OpenAI API key for gesture recognition. 
-                    All other data processing occurs locally, making it suitable for deployment in educational environments 
+                    <strong>For IT Administrators:</strong> This application uses a secure backend for gesture recognition.
+                    All API credentials are stored server-side, making it suitable for deployment in educational environments
                     with strict data governance requirements.
                   </AlertDescription>
                 </Alert>

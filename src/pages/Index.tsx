@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { Settings, BookOpen, Play, Trophy, Camera as CameraIcon, CircleAlert as AlertCircle, CircleCheck as CheckCircle, Sparkles, MessageSquare } from 'lucide-react';
+import { BookOpen, Play, Trophy, Camera as CameraIcon, CircleAlert as AlertCircle, CircleCheck as CheckCircle, Sparkles, MessageSquare } from 'lucide-react';
 
 import { Camera } from '@/components/Camera';
 import { GestureLibrary } from '@/components/GestureLibrary';
@@ -17,12 +16,13 @@ import { useFingerDetection } from '@/hooks/useFingerDetection';
 import { Gesture } from '@/data/gestures';
 import auslanLogo from '@/assets/auslan-logo.png';
 import digivecLogo from '@/assets/digivec_logo.png';
+import claSolLogo from '@/assets/cla_sol.png';
 
 const Index = () => {
   console.log('Index component rendering');
 
   const { toast } = useToast();
-  const { config, analyzeGesture, isAnalyzing, error } = useOpenAI();
+  const { analyzeGesture, isAnalyzing } = useOpenAI();
   const { recordAttempt, getSuccessRate, getMasteredCount } = useProgress();
   const { detectFingers, isAnalyzing: isDetectingFingers, initializeHands } = useFingerDetection();
 
@@ -41,16 +41,6 @@ const Index = () => {
       toast({
         title: "No gesture selected",
         description: "Please select a gesture to practice first.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!config.isValid) {
-      console.log('Config invalid:', config);
-      toast({
-        title: "API key required",
-        description: "OpenAI API key is not configured. Please contact your administrator.",
         variant: "destructive"
       });
       return;
@@ -140,6 +130,11 @@ const Index = () => {
             </div>
 
             <div className="flex items-center gap-6">
+              <img
+                src={claSolLogo}
+                alt="Clarence's Solutions"
+                className="h-10 w-auto"
+              />
               <a
                 href="https://digitalvector.com.au"
                 target="_blank"
@@ -193,16 +188,6 @@ const Index = () => {
       </header>
 
       <div className="relative container mx-auto px-4 py-6 bg-pattern-grid">
-        {/* API Key Warning */}
-        {!config.isValid && (
-          <Alert className="mb-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              <span>OpenAI API key is not configured. Gesture recognition features will be limited.</span>
-            </AlertDescription>
-          </Alert>
-        )}
-
         <Tabs value={activeMode} onValueChange={(v) => setActiveMode(v as 'learn' | 'practice' | 'train' | 'communicate')}>
           <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="learn" className="flex items-center gap-2">

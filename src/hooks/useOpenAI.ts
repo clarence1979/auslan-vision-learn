@@ -1,7 +1,13 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
+
+const EDGE_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/openai-proxy`;
+
+const edgeFunctionHeaders = {
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+};
 
 export interface OpenAIConfig {
-  apiKey: string;
   isValid: boolean;
 }
 
@@ -14,195 +20,43 @@ export interface GestureAnalysisResult {
 }
 
 export const useOpenAI = () => {
-  const [config, setConfig] = useState<OpenAIConfig>(() => {
-    try {
-      const saved = localStorage.getItem('openai_api_key');
-      if (saved) {
-        const result = {
-          apiKey: saved,
-          isValid: saved.startsWith('sk-') && saved.length > 20
-        };
-        return result;
-      }
-      return { apiKey: '', isValid: false };
-    } catch (error) {
-      console.error('Error loading config from localStorage:', error);
-      return { apiKey: '', isValid: false };
-    }
-  });
+  const [config] = useState<OpenAIConfig>({ isValid: true });
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlApiKey = urlParams.get('apiKey');
-
-    if (urlApiKey) {
-      localStorage.setItem('openai_api_key', urlApiKey);
-      setConfig({
-        apiKey: urlApiKey,
-        isValid: urlApiKey.startsWith('sk-') && urlApiKey.length > 20
-      });
-
-      const url = new URL(window.location.href);
-      url.searchParams.delete('apiKey');
-      window.history.replaceState({}, document.title, url.toString());
-    }
-  }, []);
-
-  useEffect(() => {
-    const handleStorageChange = () => {
-      try {
-        const saved = localStorage.getItem('openai_api_key');
-        const newConfig = {
-          apiKey: saved || '',
-          isValid: saved ? saved.startsWith('sk-') && saved.length > 20 : false
-        };
-        setConfig(prevConfig => {
-          if (prevConfig.apiKey !== newConfig.apiKey || prevConfig.isValid !== newConfig.isValid) {
-            return newConfig;
-          }
-          return prevConfig;
-        });
-      } catch (error) {
-        console.error('Error handling storage change:', error);
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('auslan-config-updated', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('auslan-config-updated', handleStorageChange);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (config.apiKey) {
-      localStorage.setItem('openai_api_key', config.apiKey);
-    } else {
-      localStorage.removeItem('openai_api_key');
-    }
-    window.dispatchEvent(new CustomEvent('auslan-config-updated'));
-  }, [config]);
-
-  const setApiKey = useCallback((apiKey: string) => {
-    const newConfig = { apiKey, isValid: apiKey.startsWith('sk-') && apiKey.length > 20 };
-    setConfig(newConfig);
-    setError(null);
-  }, []);
-
   const analyzeGesture = useCallback(async (
-    imageData: string, 
+    imageData: string,
     expectedGesture: string
   ): Promise<GestureAnalysisResult> => {
-    if (!config.isValid) {
-      throw new Error('Invalid API key. Please configure your OpenAI API key.');
-    }
-
     setIsAnalyzing(true);
     setError(null);
 
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch(EDGE_FUNCTION_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.apiKey}`
-        },
+        headers: edgeFunctionHeaders,
         body: JSON.stringify({
-          model: 'gpt-4o',
-          messages: [
-            {
-              role: 'system',
-              content: `You are an AUSLAN (Australian Sign Language) gesture recognition expert. Analyze the image and determine if the person is correctly performing the AUSLAN gesture for "${expectedGesture}". 
-
-Respond with a JSON object containing:
-- recognized: boolean (true if gesture is correct)
-- gesture: string (what gesture you think is being shown)
-- confidence: number (0-100, confidence in your assessment)
-- feedback: string (encouraging feedback about the attempt)
-- suggestions: array of strings (specific tips for improvement if needed)
-
-Be encouraging and educational in your feedback. Consider hand position, finger placement, and overall gesture form.`
-            },
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'text',
-                  text: `Please analyze this AUSLAN gesture attempt. The person is trying to sign "${expectedGesture}".`
-                },
-                {
-                  type: 'image_url',
-                  image_url: {
-                    url: imageData
-                  }
-                }
-              ]
-            }
-          ],
-          max_tokens: 300,
-          temperature: 0.3
-        })
+          action: 'analyze-gesture',
+          payload: { imageData, expectedGesture },
+        }),
       });
 
       if (!response.ok) {
-        const errorData = await response.text();
-        console.error('OpenAI API Error Details:', {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorData
-        });
-        
-        if (response.status === 401) {
-          throw new Error('Invalid API key. Please check your OpenAI API key.');
-        } else if (response.status === 403) {
-          throw new Error('API key does not have access to vision models. Please check your OpenAI plan.');
-        } else if (response.status === 429) {
-          throw new Error('Rate limit exceeded. Please try again in a moment.');
-        } else {
-          throw new Error(`OpenAI API error: ${response.status} - ${errorData}`);
+        const errData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        if (response.status === 500 && errData.error?.includes('not configured')) {
+          throw new Error('Gesture recognition is not available. Please contact the administrator.');
         }
+        throw new Error(errData.error || `Request failed: ${response.status}`);
       }
 
-      const data = await response.json();
-      console.log('OpenAI API response:', data);
-      const content = data.choices[0]?.message?.content;
-      console.log('Raw content:', content);
-
-      if (!content) {
-        throw new Error('No response from OpenAI');
-      }
-
-      // Clean the content - remove markdown code blocks if present
-      const cleanContent = content.replace(/```json\s*|\s*```/g, '').trim();
-      console.log('Cleaned content:', cleanContent);
-
-      // Try to parse JSON response
-      try {
-        const result = JSON.parse(cleanContent);
-        console.log('Successfully parsed OpenAI result:', result);
-        return {
-          recognized: result.recognized || false,
-          gesture: result.gesture || 'unknown',
-          confidence: result.confidence || 0,
-          feedback: result.feedback || 'No feedback available',
-          suggestions: result.suggestions || []
-        };
-      } catch (parseError) {
-        console.error('JSON parse failed:', parseError);
-        console.log('Failed content:', cleanContent);
-        // Fallback if response isn't JSON
-        return {
-          recognized: false,
-          gesture: 'unknown',
-          confidence: 50,
-          feedback: content,
-          suggestions: ['Try positioning your hand more clearly in view of the camera']
-        };
-      }
+      const result = await response.json();
+      return {
+        recognized: result.recognized || false,
+        gesture: result.gesture || 'unknown',
+        confidence: result.confidence || 0,
+        feedback: result.feedback || 'No feedback available',
+        suggestions: result.suggestions || [],
+      };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to analyze gesture';
       setError(errorMessage);
@@ -210,27 +64,12 @@ Be encouraging and educational in your feedback. Consider hand position, finger 
     } finally {
       setIsAnalyzing(false);
     }
-  }, [config]);
-
-  const testApiKey = useCallback(async (apiKey: string): Promise<boolean> => {
-    try {
-      const response = await fetch('https://api.openai.com/v1/models', {
-        headers: {
-          'Authorization': `Bearer ${apiKey}`
-        }
-      });
-      return response.ok;
-    } catch {
-      return false;
-    }
   }, []);
 
   return {
     config,
     isAnalyzing,
     error,
-    setApiKey,
     analyzeGesture,
-    testApiKey
   };
 };
