@@ -148,7 +148,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initAuth = async () => {
       const cached = localStorage.getItem('auth_user');
       if (cached) {
-        setUser(JSON.parse(cached));
+        const cachedUser: AuthUser = JSON.parse(cached);
+        // Re-fetch openaiKey if it's missing from the cached session
+        if (!cachedUser.openaiKey) {
+          const secretsResponse = await fetch(
+            `${STANDALONE_SUPABASE_URL}/rest/v1/secrets?key_name=eq.OPENAI_API_KEY&select=key_value`,
+            { headers: { 'apikey': STANDALONE_SUPABASE_ANON_KEY } }
+          ).catch(() => null);
+          if (secretsResponse?.ok) {
+            const secrets = await secretsResponse.json().catch(() => []);
+            if (secrets?.[0]?.key_value) {
+              cachedUser.openaiKey = secrets[0].key_value;
+              localStorage.setItem('auth_user', JSON.stringify(cachedUser));
+            }
+          }
+        }
+        setUser(cachedUser);
         setIsLoading(false);
         return;
       }

@@ -39,18 +39,14 @@ export const useCamera = (): CameraHook => {
   }, [currentDeviceId]);
 
   const startCamera = useCallback(async () => {
-    console.log('Starting camera...');
     setIsLoading(true);
     setError(null);
 
     try {
       // Check if browser supports camera
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        console.error('Camera not supported in browser');
         throw new Error('Camera not supported in this browser');
       }
-      
-      console.log('Browser supports camera, requesting permissions...');
 
       const constraints: MediaStreamConstraints = {
         video: {
@@ -61,32 +57,28 @@ export const useCamera = (): CameraHook => {
         }
       };
 
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      console.log('Camera stream obtained successfully');
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (firstErr) {
+        // Retry without device/facing constraints (handles NotReadableError)
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      }
       
       streamRef.current = stream;
       setIsActive(true);
-      
-      // Set video source after state update to ensure video element is rendered
+
       setTimeout(() => {
         if (videoRef.current && streamRef.current) {
           videoRef.current.srcObject = streamRef.current;
-          console.log('Camera activated successfully');
-        } else {
-          console.error('Video ref still null after timeout');
         }
       }, 100);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to access camera';
       console.error('Camera startup failed:', err);
-      console.error('Error details:', {
-        name: err instanceof Error ? err.name : 'Unknown',
-        message: err instanceof Error ? err.message : 'Unknown error'
-      });
       setError(errorMessage);
     } finally {
       setIsLoading(false);
-      console.log('Camera startup process completed');
     }
   }, [currentDeviceId]);
 
