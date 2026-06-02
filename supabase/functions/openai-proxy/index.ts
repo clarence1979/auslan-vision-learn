@@ -12,16 +12,16 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const apiKey = Deno.env.get("OPENAI_API_KEY");
+    const body = await req.json();
+    const { action, payload, apiKey: clientApiKey } = body;
+
+    const apiKey = clientApiKey || Deno.env.get("OPENAI_API_KEY");
     if (!apiKey) {
       return new Response(
         JSON.stringify({ error: "OpenAI API key not configured on server" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    const body = await req.json();
-    const { action, payload } = body;
 
     if (action === "analyze-gesture") {
       const { imageData, expectedGesture } = payload;

@@ -19,7 +19,7 @@ export interface GestureAnalysisResult {
   suggestions?: string[];
 }
 
-export const useOpenAI = () => {
+export const useOpenAI = (apiKey?: string) => {
   const [config] = useState<OpenAIConfig>({ isValid: true });
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +38,7 @@ export const useOpenAI = () => {
         body: JSON.stringify({
           action: 'analyze-gesture',
           payload: { imageData, expectedGesture },
+          ...(apiKey && { apiKey }),
         }),
       });
 
@@ -64,7 +65,7 @@ export const useOpenAI = () => {
     } finally {
       setIsAnalyzing(false);
     }
-  }, []);
+  }, [apiKey]);
 
   return {
     config,

@@ -4,25 +4,51 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { BookOpen, Play, Trophy, Camera as CameraIcon, CircleAlert as AlertCircle, CircleCheck as CheckCircle, Sparkles, MessageSquare } from 'lucide-react';
+import { BookOpen, Play, Trophy, Camera as CameraIcon, CircleAlert as AlertCircle, CircleCheck as CheckCircle, Sparkles, MessageSquare, LogOut, Loader as Loader2 } from 'lucide-react';
 
 import { Camera } from '@/components/Camera';
 import { GestureLibrary } from '@/components/GestureLibrary';
 import { GestureTraining } from '@/components/GestureTraining';
 import { SentenceBuilder } from '@/components/SentenceBuilder';
+import { LoginScreen } from '@/components/LoginScreen';
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { useProgress } from '@/hooks/useProgress';
 import { useFingerDetection } from '@/hooks/useFingerDetection';
+import { useAuth } from '@/contexts/AuthContext';
 import { Gesture } from '@/data/gestures';
 import auslanLogo from '@/assets/auslan-logo.png';
 import digivecLogo from '@/assets/digivec_logo.png';
 import claSolLogo from '@/assets/cla_sol.png';
 
 const Index = () => {
-  console.log('Index component rendering');
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-enhanced flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-3" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
+
+  return <MainApp user={user!} onLogout={logout} />;
+};
+
+interface MainAppProps {
+  user: { username: string; isAdmin: boolean; openaiKey?: string };
+  onLogout: () => void;
+}
+
+const MainApp: React.FC<MainAppProps> = ({ user, onLogout }) => {
   const { toast } = useToast();
-  const { analyzeGesture, isAnalyzing } = useOpenAI();
+  const { analyzeGesture, isAnalyzing } = useOpenAI(user.openaiKey);
   const { recordAttempt, getSuccessRate, getMasteredCount } = useProgress();
   const { detectFingers, isAnalyzing: isDetectingFingers, initializeHands } = useFingerDetection();
 
@@ -30,14 +56,8 @@ const Index = () => {
   const [selectedGesture, setSelectedGesture] = useState<Gesture | null>(null);
   const [lastResult, setLastResult] = useState<any>(null);
 
-  console.log('All hooks initialized successfully');
-
   const handleGestureCapture = async (imageData: string) => {
-    console.log('=== GESTURE ANALYSIS START ===');
-    console.log('Received image data length:', imageData.length);
-    
     if (!selectedGesture) {
-      console.log('No gesture selected');
       toast({
         title: "No gesture selected",
         description: "Please select a gesture to practice first.",
@@ -46,15 +66,10 @@ const Index = () => {
       return;
     }
 
-    console.log('Starting finger detection...');
-
     try {
-      // First, detect if fingers are present in the image
       const fingerResult = await detectFingers(imageData);
-      console.log('Finger detection result:', fingerResult);
 
       if (!fingerResult.hasFingers || fingerResult.confidence < 0.3) {
-        console.log('No fingers detected or low confidence:', fingerResult.confidence);
         toast({
           title: "No hands detected",
           description: "Please position your hand clearly in the camera view with fingers visible.",
@@ -63,39 +78,29 @@ const Index = () => {
         return;
       }
 
-      console.log('Fingers detected! Starting OpenAI analysis for gesture:', selectedGesture.name);
-      
-      // Only proceed with OpenAI analysis if fingers are detected
       const result = await analyzeGesture(imageData, selectedGesture.name);
-      console.log('Analysis result:', result);
       setLastResult(result);
-      
-      // Record the attempt
       recordAttempt(selectedGesture.id, result.recognized);
-      
-      // Show feedback
+
       toast({
         title: result.recognized ? "Great job!" : "Keep practicing!",
         description: result.feedback,
         variant: result.recognized ? "default" : "destructive"
       });
-      
+
     } catch (err) {
-      console.error('Analysis failed:', err);
       toast({
         title: "Analysis failed",
         description: err instanceof Error ? err.message : "Failed to analyze gesture",
         variant: "destructive"
       });
     }
-    console.log('=== GESTURE ANALYSIS END ===');
   };
 
   const handleGestureSelect = (gesture: Gesture) => {
     setSelectedGesture(gesture);
     setLastResult(null);
     setActiveMode('practice');
-    // Initialize finger detection when starting practice
     initializeHands();
   };
 
@@ -106,18 +111,18 @@ const Index = () => {
       <div className="floating-element w-24 h-24 top-32 right-20 opacity-20" style={{animationDelay: '2s'}} />
       <div className="floating-element w-40 h-40 bottom-20 left-1/4 opacity-25" style={{animationDelay: '4s'}} />
       <div className="floating-element w-28 h-28 bottom-40 right-1/3 opacity-15" style={{animationDelay: '6s'}} />
-      
+
       {/* Hero gradient overlay */}
       <div className="absolute inset-0 bg-gradient-hero pointer-events-none" />
-      
+
       {/* Header */}
       <header className="relative border-b bg-card/80 backdrop-blur-sm shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <img 
-                src={auslanLogo} 
-                alt="AUSLAN Vision Learn Logo" 
+              <img
+                src={auslanLogo}
+                alt="AUSLAN Vision Learn Logo"
                 className="h-12 w-12"
               />
               <div>
@@ -126,7 +131,6 @@ const Index = () => {
                   Learn Australian Sign Language with AI-powered gesture recognition
                 </p>
               </div>
-              
             </div>
 
             <div className="flex items-center gap-6">
@@ -150,37 +154,45 @@ const Index = () => {
               </a>
 
               <div className="flex items-center gap-4">
-              {/* Stats */}
-              <div className="hidden md:flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-1">
-                  <Trophy className="h-4 w-4 text-success" />
-                  <span>{getMasteredCount()} mastered</span>
+                {/* Stats */}
+                <div className="hidden md:flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-1">
+                    <Trophy className="h-4 w-4 text-success" />
+                    <span>{getMasteredCount()} mastered</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span>Success rate: {getSuccessRate()}%</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <span>Success rate: {getSuccessRate()}%</span>
-                </div>
-              </div>
 
-              {/* PayPal Donation Button */}
-              <form action="https://www.paypal.com/donate" method="post" target="_top" className="flex items-center">
-                <input type="hidden" name="hosted_button_id" value="PSXE6LDM3ZJDC" />
-                <input
-                  type="image"
-                  src="https://www.paypalobjects.com/en_AU/i/btn/btn_donateCC_LG.gif"
-                  style={{border: 0}}
-                  name="submit"
-                  title="PayPal - The safer, easier way to pay online!"
-                  alt="Donate with PayPal button"
-                  className="h-10 hover:opacity-80 transition-opacity"
-                />
-                <img
-                  alt=""
-                  style={{border: 0}}
-                  src="https://www.paypal.com/en_AU/i/scr/pixel.gif"
-                  width={1}
-                  height={1}
-                />
-              </form>
+                {/* User info + logout */}
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>{user.username}</span>
+                  <Button variant="ghost" size="sm" onClick={onLogout} className="h-8 px-2">
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* PayPal Donation Button */}
+                <form action="https://www.paypal.com/donate" method="post" target="_top" className="flex items-center">
+                  <input type="hidden" name="hosted_button_id" value="PSXE6LDM3ZJDC" />
+                  <input
+                    type="image"
+                    src="https://www.paypalobjects.com/en_AU/i/btn/btn_donateCC_LG.gif"
+                    style={{border: 0}}
+                    name="submit"
+                    title="PayPal - The safer, easier way to pay online!"
+                    alt="Donate with PayPal button"
+                    className="h-10 hover:opacity-80 transition-opacity"
+                  />
+                  <img
+                    alt=""
+                    style={{border: 0}}
+                    src="https://www.paypal.com/en_AU/i/scr/pixel.gif"
+                    width={1}
+                    height={1}
+                  />
+                </form>
               </div>
             </div>
           </div>
@@ -228,18 +240,17 @@ const Index = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <Camera 
+                      <Camera
                         onCapture={selectedGesture ? handleGestureCapture : undefined}
                         autoCapture={!!selectedGesture}
                         captureInterval={3000}
                       />
-                      
+
                       {/* Stop Camera Button */}
                       <div className="flex justify-center">
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           onClick={() => {
-                            // Stop camera and clear selection
                             setSelectedGesture(null);
                             setLastResult(null);
                             setActiveMode('learn');
@@ -261,33 +272,33 @@ const Index = () => {
                     <CardHeader>
                       <CardTitle>Current Gesture</CardTitle>
                     </CardHeader>
-                     <CardContent className="space-y-4">
-                       <div className="text-center">
-                         <div className="text-4xl font-bold mb-2">{selectedGesture.name}</div>
-                         <Badge className="mb-4">
-                           {selectedGesture.category}
-                         </Badge>
-                         
-                         {/* Visual guide image */}
-                         {selectedGesture.imageUrl && (
-                           <div className="mb-4">
-                             <img
-                               src={selectedGesture.imageUrl}
-                               alt={`Visual guide for AUSLAN gesture ${selectedGesture.name}`}
-                               className="mx-auto w-32 h-32 object-cover rounded-lg border"
-                             />
-                           </div>
-                         )}
-                         
-                         <p className="text-sm text-muted-foreground mb-4">
-                           {selectedGesture.description}
-                         </p>
-                         <div className="bg-accent rounded-lg p-4">
-                           <p className="text-sm font-medium">Instructions:</p>
-                           <p className="text-sm">{selectedGesture.instructions}</p>
-                         </div>
-                       </div>
-                     </CardContent>
+                    <CardContent className="space-y-4">
+                      <div className="text-center">
+                        <div className="text-4xl font-bold mb-2">{selectedGesture.name}</div>
+                        <Badge className="mb-4">
+                          {selectedGesture.category}
+                        </Badge>
+
+                        {/* Visual guide image */}
+                        {selectedGesture.imageUrl && (
+                          <div className="mb-4">
+                            <img
+                              src={selectedGesture.imageUrl}
+                              alt={`Visual guide for AUSLAN gesture ${selectedGesture.name}`}
+                              className="mx-auto w-32 h-32 object-cover rounded-lg border"
+                            />
+                          </div>
+                        )}
+
+                        <p className="text-sm text-muted-foreground mb-4">
+                          {selectedGesture.description}
+                        </p>
+                        <div className="bg-accent rounded-lg p-4">
+                          <p className="text-sm font-medium">Instructions:</p>
+                          <p className="text-sm">{selectedGesture.instructions}</p>
+                        </div>
+                      </div>
+                    </CardContent>
                   </Card>
 
                   {/* Feedback */}
@@ -310,12 +321,12 @@ const Index = () => {
                             {lastResult.confidence}%
                           </Badge>
                         </div>
-                        
+
                         <div>
                           <p className="text-sm font-medium mb-2">Feedback:</p>
                           <p className="text-sm text-muted-foreground">{lastResult.feedback}</p>
                         </div>
-                        
+
                         {lastResult.suggestions && lastResult.suggestions.length > 0 && (
                           <div>
                             <p className="text-sm font-medium mb-2">Suggestions:</p>

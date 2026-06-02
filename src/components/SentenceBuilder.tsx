@@ -7,22 +7,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Camera } from './Camera';
 import { useCustomGestures } from '@/hooks/useCustomGestures';
 import { useGestureRecognition } from '@/hooks/useGestureRecognition';
-import {
-  Camera as CameraIcon,
-  MessageSquare,
-  Trash2,
-  PlayCircle,
-  StopCircle,
-  Wand2,
-  AlertCircle,
-  CheckCircle,
-  Sparkles
-} from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Camera as CameraIcon, MessageSquare, Trash2, CirclePlay as PlayCircle, CircleStop as StopCircle, Wand as Wand2, CircleAlert as AlertCircle, CircleCheck as CheckCircle, Sparkles } from 'lucide-react';
 
 export const SentenceBuilder: React.FC = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const { gestures } = useCustomGestures();
-  const { recognizeCustomGesture, buildSentence, isRecognizing } = useGestureRecognition();
+  const { recognizeCustomGesture, buildSentence, isRecognizing } = useGestureRecognition(user?.openaiKey);
 
   const [isActive, setIsActive] = useState(false);
   const [recognizedWords, setRecognizedWords] = useState<string[]>([]);

@@ -14,7 +14,7 @@ export interface RecognitionResult {
   suggestions?: string[];
 }
 
-export const useGestureRecognition = () => {
+export const useGestureRecognition = (apiKey?: string) => {
   const [isRecognizing, setIsRecognizing] = useState(false);
 
   const recognizeCustomGesture = useCallback(async (
@@ -36,6 +36,7 @@ export const useGestureRecognition = () => {
         body: JSON.stringify({
           action: 'recognize-custom-gesture',
           payload: { imageData, gestureNames },
+          ...(apiKey && { apiKey }),
         }),
       });
 
@@ -55,7 +56,7 @@ export const useGestureRecognition = () => {
     } finally {
       setIsRecognizing(false);
     }
-  }, []);
+  }, [apiKey]);
 
   const buildSentence = useCallback(async (words: string[]): Promise<string> => {
     if (words.length === 0) return '';
@@ -67,6 +68,7 @@ export const useGestureRecognition = () => {
         body: JSON.stringify({
           action: 'build-sentence',
           payload: { words },
+          ...(apiKey && { apiKey }),
         }),
       });
 
@@ -80,7 +82,7 @@ export const useGestureRecognition = () => {
       console.error('Sentence building error:', err);
       return words.join(' ');
     }
-  }, []);
+  }, [apiKey]);
 
   return {
     recognizeCustomGesture,
