@@ -30,6 +30,23 @@ async function resolveApiKey(clientKey?: string): Promise<string | null> {
   return fetchKeyFromSecrets();
 }
 
+async function getLatestModel(apiKey: string): Promise<string> {
+  try {
+    const res = await fetch("https://api.openai.com/v1/models", {
+      headers: { "Authorization": `Bearer ${apiKey}` },
+    });
+    if (!res.ok) return "gpt-4o";
+    const data = await res.json();
+    // Vision-capable models: gpt-4o family, sorted newest first by created timestamp
+    const visionModels = (data.data as Array<{ id: string; created: number }>)
+      .filter(m => /^gpt-4o(?!.*audio|.*realtime|.*mini)/.test(m.id) || m.id === "gpt-4o")
+      .sort((a, b) => b.created - a.created);
+    return visionModels[0]?.id ?? "gpt-4o";
+  } catch {
+    return "gpt-4o";
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
@@ -47,6 +64,8 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    const model = await getLatestModel(apiKey);
+
     if (action === "analyze-gesture") {
       const { imageData, expectedGesture } = payload;
 
@@ -57,7 +76,7 @@ Deno.serve(async (req: Request) => {
           "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "gpt-4o",
+          model,
           messages: [
             {
               role: "system",
@@ -131,7 +150,7 @@ Be encouraging and educational in your feedback. Consider hand position, finger 
           "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "gpt-4o",
+          model,
           messages: [
             {
               role: "system",
@@ -198,7 +217,7 @@ Be helpful and encouraging. If the gesture is unclear, suggest improvements but 
           "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "gpt-4o",
+          model,
           messages: [
             {
               role: "system",
