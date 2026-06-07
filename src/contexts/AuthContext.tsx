@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { attemptAutoLogin, isInIframe } from '../utils/auto-login';
 
 interface AuthUser {
   username: string;
@@ -19,83 +20,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STANDALONE_SUPABASE_URL = 'https://qfitpwdrswvnbmzvkoyd.supabase.co';
 const STANDALONE_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmaXRwd2Ryc3d2bmJtenZrb3lkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEzNTc4NTIsImV4cCI6MjA3NjkzMzg1Mn0.owLaj3VrcyR7_LW9xMwOTTFQupbDKlvAlVwYtbidiNE';
-
-const isInIframe = () => {
-  try {
-    return window.self !== window.top;
-  } catch {
-    return true;
-  }
-};
-
-async function validateAuthToken(token: string, supabaseUrl: string, supabaseAnonKey: string) {
-  try {
-    const response = await fetch(
-      `${supabaseUrl}/rest/v1/auth_tokens?token=eq.${token}&expires_at=gt.${new Date().toISOString()}&select=username,is_admin,expires_at`,
-      {
-        headers: {
-          'apikey': supabaseAnonKey,
-          'Content-Type': 'application/json',
-        }
-      }
-    );
-
-    const tokens = await response.json();
-
-    if (tokens && tokens.length > 0) {
-      return {
-        username: tokens[0].username,
-        isAdmin: tokens[0].is_admin,
-      };
-    }
-
-    return null;
-  } catch (error) {
-    console.error('Token validation error:', error);
-    return null;
-  }
-}
-
-async function attemptAutoLogin(): Promise<{ authenticated: boolean; username?: string; isAdmin?: boolean; openaiKey?: string }> {
-  if (!isInIframe()) {
-    return { authenticated: false };
-  }
-
-  return new Promise((resolve) => {
-    window.parent.postMessage({ type: 'REQUEST_API_VALUES' }, '*');
-
-    const handleMessage = async (event: MessageEvent) => {
-      if (event.data.type === 'API_VALUES_RESPONSE') {
-        window.removeEventListener('message', handleMessage);
-
-        const { authToken, SUPABASE_URL, SUPABASE_ANON_KEY, OPENAI_API_KEY } = event.data.data;
-
-        if (authToken && SUPABASE_URL && SUPABASE_ANON_KEY) {
-          const validatedUser = await validateAuthToken(authToken, SUPABASE_URL, SUPABASE_ANON_KEY);
-
-          if (validatedUser) {
-            resolve({
-              username: validatedUser.username,
-              isAdmin: validatedUser.isAdmin,
-              openaiKey: OPENAI_API_KEY,
-              authenticated: true,
-            });
-            return;
-          }
-        }
-
-        resolve({ authenticated: false });
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-
-    setTimeout(() => {
-      window.removeEventListener('message', handleMessage);
-      resolve({ authenticated: false });
-    }, 2000);
-  });
-}
 
 async function manualLogin(username: string, password: string): Promise<{ authenticated: boolean; username?: string; isAdmin?: boolean; openaiKey?: string }> {
   try {
@@ -149,17 +73,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const cached = localStorage.getItem('auth_user');
       if (cached) {
         const cachedUser: AuthUser = JSON.parse(cached);
-        // Re-fetch openaiKey if it's missing from the cached session
         if (!cachedUser.openaiKey) {
-          const secretsResponse = await fetch(
-            `${STANDALONE_SUPABASE_URL}/rest/v1/secrets?key_name=eq.OPENAI_API_KEY&select=key_value`,
-            { headers: { 'apikey': STANDALONE_SUPABASE_ANON_KEY } }
-          ).catch(() => null);
-          if (secretsResponse?.ok) {
-            const secrets = await secretsResponse.json().catch(() => []);
-            if (secrets?.[0]?.key_value) {
-              cachedUser.openaiKey = secrets[0].key_value;
-              localStorage.setItem('auth_user', JSON.stringify(cachedUser));
+          const storedKey = localStorage.getItem('VITE_OPENAI_API_KEY');
+          if (storedKey) {
+            cachedUser.openaiKey = storedKey;
+            localStorage.setItem('auth_user', JSON.stringify(cachedUser));
+          } else {
+            const secretsResponse = await fetch(
+              `${STANDALONE_SUPABASE_URL}/rest/v1/secrets?key_name=eq.OPENAI_API_KEY&select=key_value`,
+              { headers: { 'apikey': STANDALONE_SUPABASE_ANON_KEY } }
+            ).catch(() => null);
+            if (secretsResponse?.ok) {
+              const secrets = await secretsResponse.json().catch(() => []);
+              if (secrets?.[0]?.key_value) {
+                cachedUser.openaiKey = secrets[0].key_value;
+                localStorage.setItem('auth_user', JSON.stringify(cachedUser));
+              }
             }
           }
         }
@@ -168,16 +97,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      const authResult = await attemptAutoLogin();
+      if (isInIframe()) {
+        const authResult = await attemptAutoLogin();
 
-      if (authResult.authenticated) {
-        const userData: AuthUser = {
-          username: authResult.username!,
-          isAdmin: authResult.isAdmin!,
-          openaiKey: authResult.openaiKey,
-        };
-        setUser(userData);
-        localStorage.setItem('auth_user', JSON.stringify(userData));
+        if (authResult.authenticated) {
+          const userData: AuthUser = {
+            username: authResult.username!,
+            isAdmin: authResult.isAdmin || false,
+            openaiKey: localStorage.getItem('VITE_OPENAI_API_KEY') || undefined,
+          };
+          setUser(userData);
+          localStorage.setItem('auth_user', JSON.stringify(userData));
+        }
       }
 
       setIsLoading(false);
@@ -219,6 +150,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     localStorage.removeItem('auth_user');
     localStorage.removeItem('openai_api_key');
+    localStorage.removeItem('VITE_OPENAI_API_KEY');
+    localStorage.removeItem('VITE_CLAUDE_API_KEY');
+    localStorage.removeItem('VITE_GEMINI_API_KEY');
+    localStorage.removeItem('VITE_REPLICATE_API_KEY');
+    localStorage.removeItem('VITE_SUPABASE_URL');
+    localStorage.removeItem('VITE_SUPABASE_ANON_KEY');
   };
 
   const setApiKeys = (keys: { openaiKey?: string }) => {
