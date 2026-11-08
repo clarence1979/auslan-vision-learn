@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-const EDGE_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/openai-proxy`;
+const EDGE_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/auslan-openai-proxy`;
 
 const edgeFunctionHeaders = {
   'Content-Type': 'application/json',

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getUserId } from '@/integrations/supabase/client';
 
 export interface CustomGesture {
   id: string;
@@ -10,15 +10,6 @@ export interface CustomGesture {
   created_at: string;
   updated_at: string;
 }
-
-const getUserId = (): string => {
-  let userId = localStorage.getItem('auslan_user_id');
-  if (!userId) {
-    userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    localStorage.setItem('auslan_user_id', userId);
-  }
-  return userId;
-};
 
 export const useCustomGestures = () => {
   const [gestures, setGestures] = useState<CustomGesture[]>([]);
