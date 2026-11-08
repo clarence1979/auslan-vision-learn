@@ -34,7 +34,7 @@ export const LoginScreen: React.FC = () => {
         setError('Invalid username or password');
       }
     } catch (err) {
-      setError('Login failed. Please try again.');
+      setError(err instanceof Error && err.message ? err.message : 'Sign-in failed. Please try again.');
     } finally {
       setIsLoggingIn(false);
     }
@@ -54,7 +54,10 @@ export const LoginScreen: React.FC = () => {
             <img src={auslanLogo} alt="AUSLAN Vision Learn" className="h-16 w-16" />
           </div>
           <CardTitle className="text-2xl">Welcome to AUSLAN Vision Learn</CardTitle>
-          <CardDescription>Sign in to access the application</CardDescription>
+          <CardDescription>
+            Sign in with your teachingtools.dev account. If you're already signed in at{' '}
+            <a href="https://teachingtools.dev" target="_blank" rel="noopener noreferrer" className="underline">teachingtools.dev</a>, reload this page.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

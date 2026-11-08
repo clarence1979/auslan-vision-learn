@@ -6,28 +6,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
-const EXTERNAL_SUPABASE_URL = "https://qfitpwdrswvnbmzvkoyd.supabase.co";
-const EXTERNAL_SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmaXRwd2Ryc3d2bmJtenZrb3lkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEzNTc4NTIsImV4cCI6MjA3NjkzMzg1Mn0.owLaj3VrcyR7_LW9xMwOTTFQupbDKlvAlVwYtbidiNE";
-
-async function fetchKeyFromSecrets(): Promise<string | null> {
-  try {
-    const res = await fetch(
-      `${EXTERNAL_SUPABASE_URL}/rest/v1/secrets?key_name=eq.OPENAI_API_KEY&select=key_value`,
-      { headers: { apikey: EXTERNAL_SUPABASE_ANON_KEY } }
-    );
-    const rows = await res.json();
-    return rows?.[0]?.key_value ?? null;
-  } catch {
-    return null;
-  }
-}
-
 async function resolveApiKey(clientKey?: string): Promise<string | null> {
   if (clientKey) return clientKey;
-  const envKey = Deno.env.get("OPENAI_API_KEY");
-  if (envKey) return envKey;
-  return fetchKeyFromSecrets();
+  // Keys come from teachingtools.dev via the browser; the old shared database is gone.
+  return Deno.env.get("OPENAI_API_KEY") ?? null;
 }
 
 async function getLatestModel(apiKey: string): Promise<string> {
