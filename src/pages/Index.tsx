@@ -174,7 +174,7 @@ const MainApp: React.FC<MainAppProps> = ({ user, onLogout }) => {
                 </div>
 
                 {/* PayPal Donation Button */}
-                <form action="https://www.paypal.com/donate" method="post" target="_top" className="flex items-center">
+                <form action="https://www.paypal.com/donate" method="post" target="_blank" className="flex items-center">
                   <input type="hidden" name="hosted_button_id" value="PSXE6LDM3ZJDC" />
                   <input
                     type="image"
