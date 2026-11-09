@@ -3,25 +3,43 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, X-Session-Token",
 };
 
-async function resolveApiKey(clientKey?: string): Promise<string | null> {
-  if (clientKey) return clientKey;
-  // Keys come from teachingtools.dev via the browser; the old shared database is gone.
-  return Deno.env.get("OPENAI_API_KEY") ?? null;
+// ---------------------------------------------------------------------------
+// OpenAI through teachingtools.dev. The page sends the person's pass
+// (x-session-token), never a key; the school's AI relay checks the pass and
+// adds the key on the server.
+// ---------------------------------------------------------------------------
+const AI_RELAY = "https://yihztkqrfxgvvsovpmfu.supabase.co/functions/v1/eduai-ai/openai";
+const SIGN_IN_MESSAGE = "Sign in at teachingtools.dev to use the AI features.";
+
+function hasPass(req: Request): boolean {
+  return (req.headers.get("x-session-token") ?? "").length >= 20;
 }
 
-async function getLatestModel(apiKey: string): Promise<string> {
+function openai(req: Request, path: string, init: RequestInit = {}): Promise<Response> {
+  if (!hasPass(req)) {
+    return Promise.resolve(new Response(JSON.stringify({ error: { message: SIGN_IN_MESSAGE } }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    }));
+  }
+  const headers = new Headers(init.headers);
+  headers.delete("authorization");
+  headers.set("x-session-token", req.headers.get("x-session-token")!);
+  return fetch(`${AI_RELAY}${path}`, { ...init, headers });
+}
+
+async function getLatestModel(req: Request): Promise<string> {
   try {
-    const res = await fetch("https://api.openai.com/v1/models", {
-      headers: { "Authorization": `Bearer ${apiKey}` },
-    });
+    const res = await openai(req, "/v1/models");
     if (!res.ok) return "gpt-4o";
     const data = await res.json();
-    // Vision-capable models: gpt-4o family, sorted newest first by created timestamp
+    // Vision-capable chat models: gpt-4o or a dated snapshot, newest first (the other
+    // gpt-4o-* models are transcription, speech or realtime models and can't chat).
     const visionModels = (data.data as Array<{ id: string; created: number }>)
-      .filter(m => /^gpt-4o(?!.*audio|.*realtime|.*mini)/.test(m.id) || m.id === "gpt-4o")
+      .filter(m => /^gpt-4o(-\d{4}-\d{2}-\d{2})?$/.test(m.id))
       .sort((a, b) => b.created - a.created);
     return visionModels[0]?.id ?? "gpt-4o";
   } catch {
@@ -36,26 +54,29 @@ Deno.serve(async (req: Request) => {
 
   try {
     const body = await req.json();
-    const { action, payload, apiKey: clientApiKey } = body;
+    const { action, payload } = body;
 
-    const apiKey = await resolveApiKey(clientApiKey);
-    if (!apiKey) {
+    if (action === "check-config") {
+      return new Response(JSON.stringify({ isConfigured: hasPass(req) }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!hasPass(req)) {
       return new Response(
-        JSON.stringify({ error: "OpenAI API key not configured on server" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: SIGN_IN_MESSAGE }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const model = await getLatestModel(apiKey);
+    const model = await getLatestModel(req);
 
     if (action === "analyze-gesture") {
       const { imageData, expectedGesture } = payload;
 
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      const response = await openai(req, "/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
           model,
@@ -125,11 +146,10 @@ Be encouraging and educational in your feedback. Consider hand position, finger 
     if (action === "recognize-custom-gesture") {
       const { imageData, gestureNames } = payload;
 
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      const response = await openai(req, "/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
           model,
@@ -192,11 +212,10 @@ Be helpful and encouraging. If the gesture is unclear, suggest improvements but 
     if (action === "build-sentence") {
       const { words } = payload;
 
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      const response = await openai(req, "/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
           model,
@@ -230,12 +249,6 @@ Respond with ONLY the complete sentence, nothing else. Keep it concise and natur
       const sentence = data.choices[0]?.message?.content?.trim() || words.join(" ");
 
       return new Response(JSON.stringify({ sentence }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    if (action === "check-config") {
-      return new Response(JSON.stringify({ isConfigured: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

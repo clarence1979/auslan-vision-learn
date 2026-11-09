@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import * as eduai from '@/lib/eduai';
 
-// Accounts and API keys now come from teachingtools.dev (see src/lib/eduai.ts).
-// The old version read usernames, plain-text passwords and API keys straight
-// out of a database that anyone on the internet could read.
+// The account comes from teachingtools.dev (see src/lib/eduai.ts): this app never asks for
+// a password and never holds an AI key. openaiKey is a stand-in that makes AI requests go
+// through the school's relay with a short-lived pass.
 
 interface AuthUser {
   username: string;
@@ -15,8 +15,6 @@ interface AuthContextType {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  /** Throws an Error with a message to show if sign-in fails. */
-  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   setApiKeys: (keys: { openaiKey?: string }) => void;
 }
@@ -39,11 +37,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const user = toUser(state);
 
-  const login = async (username: string, password: string): Promise<boolean> => {
-    await eduai.login(username, password);
-    return true;
-  };
-
   const logout = () => {
     localStorage.removeItem('auth_user');
     void eduai.logout();
@@ -57,7 +50,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user,
       isAuthenticated: !!user,
       isLoading: state.status === 'loading',
-      login,
       logout,
       setApiKeys,
     }}>
