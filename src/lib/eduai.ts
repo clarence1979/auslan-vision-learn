@@ -11,7 +11,7 @@
  * api.anthropic.com or generativelanguage.googleapis.com as it always did, with the
  * placeholder "keys" this file hands out (getKey('OPENAI_API_KEY') and friends). Those
  * calls are redirected to the school's AI relay with the pass, and the relay adds the
- * real key on the server. Calls to the school's own server functions carry the pass too.
+ * real key on the server. Calls to the school's AI server functions carry the pass too.
  * A key a person typed in themselves still goes straight to the provider.
  *
  * Everything in a program that doesn't use AI works without any of this, opened from
@@ -30,10 +30,16 @@ const DESKTOP_ORIGINS = new Set([
 ]);
 const BRIDGE_URL = `${EDUAI_SITE}/key-bridge.html`;
 
-/** Server functions of the school's programs: requests to them carry the pass. */
-const SCHOOL_FUNCTION_ORIGINS = new Set([
-  'https://yihztkqrfxgvvsovpmfu.supabase.co',
-  'https://fvawqvpnvabieadgqreo.supabase.co',
+/**
+ * The school's server functions that use AI: requests to them carry the pass, which they
+ * forward to the relay. (Only these: other functions don't accept the extra header.)
+ */
+const PASS_FUNCTIONS = new Set([
+  'https://yihztkqrfxgvvsovpmfu.supabase.co/functions/v1/pycode-ai-grading',
+  'https://yihztkqrfxgvvsovpmfu.supabase.co/functions/v1/dreamtales-generate-story',
+  'https://yihztkqrfxgvvsovpmfu.supabase.co/functions/v1/dreamtales-generate-image',
+  'https://yihztkqrfxgvvsovpmfu.supabase.co/functions/v1/auslan-openai-proxy',
+  'https://fvawqvpnvabieadgqreo.supabase.co/functions/v1/check-interactive-answers',
 ]);
 const PROVIDER_HOSTS: Record<string, Provider> = {
   'api.openai.com': 'openai',
@@ -443,8 +449,7 @@ function installFetchRedirect() {
       if (!usesStandIn(req.headers, url)) return nativeFetch(req); // someone's own key
       return relay(provider, url, req);
     }
-    if (SCHOOL_FUNCTION_ORIGINS.has(url.origin) && url.pathname.startsWith('/functions/v1/') &&
-        !/\/functions\/v1\/eduai-/.test(url.pathname)) {
+    if (PASS_FUNCTIONS.has(`${url.origin}${url.pathname.replace(/\/+$/, '')}`)) {
       const p = await currentPass();
       if (p) {
         const req = new Request(input, init);
